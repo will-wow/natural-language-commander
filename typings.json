@@ -1,0 +1,12 @@
+{
+  "name": "natural-language-commander",
+  "version": false,
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519"
+  },
+  "ambientDependencies": {
+    "moment-node": "registry:dt/moment-node#2.11.1+20160417135035",
+    "moment-timezone": "registry:dt/moment-timezone#0.2.5+20160329220348",
+    "node": "registry:dt/node#4.0.0+20160505172921"
+  }
+}

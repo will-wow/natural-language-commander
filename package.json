@@ -1,0 +1,29 @@
+{
+  "name": "natural-language-commander",
+  "version": "0.0.0",
+  "description": "A tool for connecting natural language commands with callbacks.",
+  "main": "nlc.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nlp",
+    "bots"
+  ],
+  "author": "Will Lee-Wagner <will@whentheresawill.net>",
+  "license": "MIT",
+  "devDependencies": {
+    "del": "^2.2.0",
+    "typescript": "^1.8.9",
+    "typings": "^0.7.9"
+  },
+  "dependencies": {
+    "lodash": "^4.6.1",
+    "moment": "^2.12.0",
+    "moment-timezone": "^0.5.3",
+    "natural": "^0.4.0"
+  },
+  "engines": {
+    "node": "5.10.x"
+  }
+}
