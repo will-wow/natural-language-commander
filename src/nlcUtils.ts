@@ -5,11 +5,11 @@
 
 import _ = require('lodash');
 import natural = require('natural');
-import spellcheckLoader from './lib/spellcheckLoader';
+import loadSpellcheck from './lib/loadSpellcheck';
 
 let spellcheck: natural.Spellcheck;
 
-spellcheckLoader.then((spellcheckInstance) => {
+loadSpellcheck().then((spellcheckInstance) => {
   spellcheck = spellcheckInstance;
 });
 

@@ -1,8 +1,3 @@
-/**
- * A singelton that holds all registered natural language commands for the bot.
- * @module naturalLanguageCommander
- */
-
 import _ = require('lodash');
 
 import promise = require('es6-promise');
@@ -12,8 +7,8 @@ import * as standardSlots from './standardSlots';
 
 const Promise = promise.Promise;
 
-type SlotTypeFunction = (message: string) => any;
-type SlotTypeItem = string | string[] | RegExp | SlotTypeFunction;
+export type SlotTypeFunction = (message: string) => any;
+export type SlotTypeItem = string | string[] | RegExp | SlotTypeFunction;
 
 /** A slot type to be used in intents. */
 export type ISlotType = {
