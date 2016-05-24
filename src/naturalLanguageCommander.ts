@@ -5,9 +5,12 @@
 
 import _ = require('lodash');
 
-import Deferred from '../Deferred';
+import promise = require('es6-promise');
+import Deferred from './lib/Deferred';
 import * as utils from './nlcUtils';
 import * as standardSlots from './standardSlots';
+
+const Promise = promise.Promise;
 
 type SlotTypeFunction = (message: string) => any;
 type SlotTypeItem = string | string[] | RegExp | SlotTypeFunction;
@@ -92,9 +95,9 @@ class NaturalLanguageCommander {
     });
   };
 
-  public handleCommand(data: any, command: string): Promise<string>;
-  public handleCommand(command: string): Promise<string>;
-  public handleCommand(dataOrCommand: any, command?: string): Promise<string> {
+  public handleCommand(data: any, command: string): promise.Promise<string>;
+  public handleCommand(command: string): promise.Promise<string>;
+  public handleCommand(dataOrCommand: any, command?: string): promise.Promise<string> {
     const deferred = new Deferred();
 
     // Handle overload.

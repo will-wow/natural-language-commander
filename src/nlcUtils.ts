@@ -5,7 +5,7 @@
 
 import _ = require('lodash');
 import natural = require('natural');
-import spellcheckLoader from '../spellcheckLoader';
+import spellcheckLoader from './lib/spellcheckLoader';
 
 let spellcheck: natural.Spellcheck;
 

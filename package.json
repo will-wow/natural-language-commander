@@ -4,7 +4,7 @@
   "description": "A tool for connecting natural language commands with callbacks.",
   "main": "nlc.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha --opts ./mocha.opts"
   },
   "keywords": [
     "nlp",
@@ -13,11 +13,15 @@
   "author": "Will Lee-Wagner <will@whentheresawill.net>",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^3.5.0",
     "del": "^2.2.0",
-    "typescript": "^1.8.9",
-    "typings": "^0.7.9"
+    "mocha": "^2.5.1",
+    "ts-node": "^0.7.3",
+    "typescript": "^1.8.10",
+    "typings": "^1.0.4"
   },
   "dependencies": {
+    "es6-promise": "^3.2.1",
     "lodash": "^4.6.1",
     "moment": "^2.12.0",
     "moment-timezone": "^0.5.3",
