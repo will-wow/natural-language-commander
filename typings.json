@@ -11,10 +11,8 @@
     "natural": "registry:dt/natural#0.2.1+20160316155526",
     "node": "registry:env/node#4.0.0+20160507210304"
   },
-  "devDependencies": {
-    "chai": "registry:npm/chai#3.5.0+20160415060238"
-  },
   "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160317120654",
     "mocha": "registry:env/mocha#2.2.5+20160321223601"
   }
 }
