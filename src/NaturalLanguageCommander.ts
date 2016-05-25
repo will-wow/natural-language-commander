@@ -16,6 +16,8 @@ export type ISlotType = {
   type: string;
   /** The associated options */
   options: SlotTypeItem;
+  /** The first-round matcher for the regex. */
+  baseMatcher?: string;
 }
 
 /** A slot to associate with an intent. */
@@ -54,7 +56,7 @@ type SlotMapping = {
 }
 
 class NaturalLanguageCommander {
-  private slotTypes: { [name: string]: SlotTypeItem } = {};
+  private slotTypes: { [name: string]: ISlotType } = {};
   private intents: IIntent[] = [];
   private matchers: IUtteranceMatcher[] = [];
 
@@ -69,7 +71,7 @@ class NaturalLanguageCommander {
    * @param slotType
    */
   public addSlotType = (slotType: ISlotType): void => {
-    this.slotTypes[slotType.type] = slotType.options;
+    this.slotTypes[slotType.type] = slotType;
   };
 
   /**
@@ -215,17 +217,18 @@ class NaturalLanguageCommander {
       throw new Error(`Slot Type ${slotTypeName} not found!`);
     }
 
-    const slotType: SlotTypeItem = this.slotTypes[slotTypeName];
+    const slotType: ISlotType = this.slotTypes[slotTypeName];
+    const slotOptions: SlotTypeItem = slotType.options;
 
     // Match the slot based on the type.
-    if (_.isRegExp(slotType)) {
-      return this.getRegexpSlot(slotText, slotType);
-    } else if (_.isString(slotType)) {
-      return this.getStringSlot(slotText, slotType);
-    } else if (_.isArray(slotType)) {
-      return this.getListSlotType(slotText, slotType);
+    if (_.isRegExp(slotOptions)) {
+      return this.getRegexpSlot(slotText, slotOptions);
+    } else if (_.isString(slotOptions)) {
+      return this.getStringSlot(slotText, slotOptions);
+    } else if (_.isArray(slotOptions)) {
+      return this.getListSlotType(slotText, slotOptions);
     } else {
-      return this.getFunctionSlotType(slotText, slotType);
+      return this.getFunctionSlotType(slotText, slotOptions);
     }
   }
 
@@ -294,12 +297,20 @@ class NaturalLanguageCommander {
         if (_.includes(names, slotName)) {
           // Find where in the slot names array this slot is.
           const slotIndex: number = names.indexOf(slotName);
-          // Find the matching slot type.
+          // Find the matching intent slot.
           const slot: IIntentSlot = slots[slotIndex];
+          // Find the matching slot type.
+          const slotType: ISlotType = this.slotTypes[slot.type];
+          
+          // Handle bad slot type.
+          if (!slotType) {
+            throw new Error(`NLC: slot type ${slot.type} does not exist!`);
+          }
 
           // Update the utterance.
           utterance = this.repaceSlotWithCaptureGroup(
             utterance,
+            slotType,
             matchIndex,
             matchLength
           );
@@ -347,12 +358,13 @@ class NaturalLanguageCommander {
   /**
    * Replace a solt with a regex capture group.
    */
-  private repaceSlotWithCaptureGroup(utterance: string, matchIndex: number, matchLength: number): string {
+  private repaceSlotWithCaptureGroup(utterance: string, slotType: ISlotType, matchIndex: number, matchLength: number): string {
     // Find the end of the slot name (accounting for braces).
     const lastIndex: number = matchIndex + matchLength;
+    const matcher = slotType.baseMatcher || '.+';
 
     // Replace the slot with a generic capture group.
-    return utterance.slice(0, matchIndex) + '(.+)' + utterance.slice(lastIndex);
+    return `${utterance.slice(0, matchIndex)} (${matcher}) ${utterance.slice(lastIndex)}`;
   }
 
   /**

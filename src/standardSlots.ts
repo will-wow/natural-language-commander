@@ -67,11 +67,13 @@ export const DATE: ISlotType = {
 export const SLACK_NAME: ISlotType = {
   type: 'SLACK_NAME',
   // Names start with @.
-  options: /^@\w+/i
+  options: /^@\w+/i,
+  baseMatcher: '@\\w+'
 };
 
 export const SLACK_ROOM: ISlotType = {
   type: 'SLACK_ROOM',
   // Rooms start with #, but names work too.
-  options: /^[#@]\w+/i
+  options: /^[#@]\w+/i,
+  baseMatcher: '[#@]\\w+'
 };

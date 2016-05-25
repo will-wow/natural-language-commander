@@ -19,8 +19,23 @@ function expectCommandToMatch(nlc: NLC, command: string, matchCallback, noMatchC
     .catch((error) => done(error));
 }
 
+/** Expect a command to get a match with paramaters. */
+function expectCommandToMatchWith(nlc: NLC, command: string, args: any[], matchCallback, noMatchCallback, done) {
+  nlc.handleCommand(command)
+    .catch(noMatchCallback)
+    .then(() => {
+      // Run the expect first to get its this context.
+      const expectContext = expect(matchCallback);
+      // Pass the args list to with, along with the expect's context, to not break `this`.
+      expectContext.to.have.been.called.with.apply(expectContext, args);
+      expect(noMatchCallback).not.to.have.been.called();
+      done();
+    })
+    .catch((error) => done(error));
+}
+
 /** Expect a command not to get a match. */
-function expectCommandToNotMatch(nlc: NLC, command: string, matchCallback, noMatchCallback, done) {
+function expectCommandNotToMatch(nlc: NLC, command: string, matchCallback, noMatchCallback, done) {
   nlc.handleCommand(command)
     .catch(noMatchCallback)
     .then(() => {
@@ -60,7 +75,7 @@ describe('NLC', () => {
     });
 
     it('should not match a simple bad input', (done) => {
-      expectCommandToNotMatch(nlc, 'tset', matchCallback, noMatchCallback, done);
+      expectCommandNotToMatch(nlc, 'tset', matchCallback, noMatchCallback, done);
     });
   });
 
@@ -88,13 +103,13 @@ describe('NLC', () => {
       });
 
       it('should not match a bad string slot', (done) => {
-        expectCommandToNotMatch(nlc, 'test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch(nlc, 'test test', matchCallback, noMatchCallback, done);
       });
     });
 
     describe('DATE', () => {
       beforeEach(() => {
-        // Register an intent with a STRING.
+        // Register an intent with a DATE.
         nlc.registerIntent({
           intent: 'DATE_TEST',
           callback: matchCallback,
@@ -139,13 +154,13 @@ describe('NLC', () => {
       });
 
       it('should match a date slot with other strings', (done) => {
-        expectCommandToNotMatch(nlc, 'test foobar test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch(nlc, 'test foobar test', matchCallback, noMatchCallback, done);
       });
     });
 
     describe('SLACK_NAME', () => {
       beforeEach(() => {
-        // Register an intent with a STRING.
+        // Register an intent with a SLACK_NAME.
         nlc.registerIntent({
           intent: 'SLACK_NAME_TEST',
           callback: matchCallback,
@@ -166,13 +181,13 @@ describe('NLC', () => {
       });
 
       it('should not match a bad name slot', (done) => {
-        expectCommandToNotMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
       });
     });
 
     describe('SLACK_ROOM', () => {
       beforeEach(() => {
-        // Register an intent with a STRING.
+        // Register an intent with a SLACK_ROOM.
         nlc.registerIntent({
           intent: 'SLACK_ROOM_TEST',
           callback: matchCallback,
@@ -197,11 +212,40 @@ describe('NLC', () => {
       });
 
       it('should not match a bad room slot', (done) => {
-        expectCommandToNotMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
       });
     });
   });
-  
-  
+
+  describe('multiple slots', () => {
+    it('should not collide when the first is a single word', (done) => {
+      nlc.registerIntent({
+        intent: 'COLLISION_TEST',
+        callback: matchCallback,
+        slots: [
+          {
+            name: 'Name',
+            type: 'SLACK_NAME'
+          },
+          {
+            name: 'String',
+            type: 'STRING'
+          }
+        ],
+        utterances: [
+          'test {Name} {String} test'
+        ]
+      });
+
+      expectCommandToMatchWith(
+        nlc,
+        'test @name some more stuff test',
+        ['@name', 'some more stuff'],
+        matchCallback,
+        noMatchCallback,
+        done
+      );
+    });
+  });
 });
 
