@@ -1,20 +1,14 @@
 import chai = require('chai');
 const spies = require('chai-spies');
 
-import promise = require('es6-promise');
-const Promise = promise.Promise;
-
-chai.use(spies);
-
 import NLC from '../NaturalLanguageCommander';
 import Deferred from '../lib/Deferred';
 
+chai.use(spies);
 const expect = chai.expect;
 
 describe('basic commands', () => {
-  let deferred: Deferred;
   let nlc: NLC;
-  let matched: boolean;
   let matchCallback;
   let noMatchCallback;
   
@@ -52,5 +46,59 @@ describe('basic commands', () => {
       done();
     })
     .catch((error) => done(error));
+  });
+});
+
+describe('default slots', () => {
+  let nlc: NLC;
+  let matchCallback;
+  let noMatchCallback;
+  
+  beforeEach(() => {
+    nlc = new NLC();
+    
+    matchCallback = chai.spy();
+    noMatchCallback = chai.spy();
+  });
+  
+  describe('STRING', () => {
+    beforeEach(() => {
+      // Register an intent with a STRING.
+      nlc.registerIntent({
+        intent: 'STRING_TEST',
+        callback: matchCallback,
+        slots: [
+          {
+            name: 'String',
+            type: 'STRING'
+          }
+        ],
+        utterances: [
+          'test {String} test'
+        ]
+      });
+    });
+    
+    it('should match a string slot', (done) => {
+      nlc.handleCommand('test this is a string test')
+      .catch(noMatchCallback)
+      .then(() => {
+        expect(matchCallback).to.have.been.called();
+        expect(noMatchCallback).not.to.have.been.called();
+        done();
+      })
+      .catch((error) => done(error));
+    });
+    
+    it('should match a string slot', (done) => {
+      nlc.handleCommand('test test')
+      .catch(noMatchCallback)
+      .then(() => {
+        expect(matchCallback).not.to.have.been.called();
+        expect(noMatchCallback).to.have.been.called();
+        done();
+      })
+      .catch((error) => done(error));
+    });
   });
 });
