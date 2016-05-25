@@ -95,7 +95,7 @@ describe('slot types', () => {
       expectCommandToMatch(nlc, 'test this is a string test', matchCallback, noMatchCallback, done);
     });
 
-    it('should not match a string slot', (done) => {
+    it('should not match a bad string slot', (done) => {
       expectCommandToNotMatch(nlc, 'test test', matchCallback, noMatchCallback, done);
     });
   });
@@ -148,6 +148,64 @@ describe('slot types', () => {
     
     it('should match a date slot with other strings', (done) => {
       expectCommandToNotMatch(nlc, 'test foobar test', matchCallback, noMatchCallback, done);
+    });
+  });
+  
+  describe('SLACK_NAME', () => {
+    beforeEach(() => {
+      // Register an intent with a STRING.
+      nlc.registerIntent({
+        intent: 'SLACK_NAME_TEST',
+        callback: matchCallback,
+        slots: [
+          {
+            name: 'Name',
+            type: 'SLACK_NAME'
+          }
+        ],
+        utterances: [
+          'test {Name} test'
+        ]
+      });
+    });
+
+    it('should match a name slot', (done) => {
+      expectCommandToMatch(nlc, 'test @test test', matchCallback, noMatchCallback, done);
+    });
+
+    it('should not match a bad name slot', (done) => {
+      expectCommandToNotMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
+    });
+  });
+  
+  describe('SLACK_ROOM', () => {
+    beforeEach(() => {
+      // Register an intent with a STRING.
+      nlc.registerIntent({
+        intent: 'SLACK_ROOM_TEST',
+        callback: matchCallback,
+        slots: [
+          {
+            name: 'Room',
+            type: 'SLACK_ROOM'
+          }
+        ],
+        utterances: [
+          'test {Room} test'
+        ]
+      });
+    });
+
+    it('should match a room slot', (done) => {
+      expectCommandToMatch(nlc, 'test #test test', matchCallback, noMatchCallback, done);
+    });
+
+    it('should match a name slot', (done) => {
+      expectCommandToMatch(nlc, 'test @test test', matchCallback, noMatchCallback, done);
+    });
+
+    it('should not match a bad room slot', (done) => {
+      expectCommandToNotMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
     });
   });
 });
