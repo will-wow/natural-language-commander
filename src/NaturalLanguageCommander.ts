@@ -357,7 +357,7 @@ class NaturalLanguageCommander {
     const matcher = slotType.baseMatcher || '.+';
 
     // Replace the slot with a generic capture group.
-    return `${utterance.slice(0, matchIndex)} (${matcher}) ${utterance.slice(lastIndex)}`;
+    return `${utterance.slice(0, matchIndex)}(${matcher})${utterance.slice(lastIndex)}`;
   }
 
   /**
