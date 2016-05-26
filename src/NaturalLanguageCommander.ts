@@ -2,7 +2,7 @@ import _ = require('lodash');
 
 import promise = require('es6-promise');
 import Deferred from './lib/Deferred';
-import * as utils from './nlcUtils';
+import commonMistakes from './lib/commonMistakes';
 import * as standardSlots from './standardSlots';
 
 const Promise = promise.Promise;
@@ -64,14 +64,9 @@ class NaturalLanguageCommander {
   /**
    * @param spellcheckCorpus - An array of words to use as the corpus for the spellchecker.
    */
-  constructor (spellcheckCorpus?: string[]) {
+  constructor () {
     // Add the standard slot types.
     _.forOwn(standardSlots, this.addSlotType);
-    
-    // Set up the spellchecker.
-    if (spellcheckCorpus) {
-      this.spellcheck = new natural.Spellcheck(spellcheckCorpus);
-    }
   }
 
   /**
@@ -148,52 +143,6 @@ class NaturalLanguageCommander {
     }
 
     return deferred.promise;
-  }
-
-  private getSpellcheckedCommand(command: string) {
-    // Just return the command if there's no spellchecker, or the command is too long.
-    if (!this.spellcheck || command.length > 255) {
-      return [command];
-    }
-    
-    /** Possible commands, based on the spellchecker. */
-    const commands: string[] = [''];
-    
-    /** The command split into words. */
-    const checkedWords = this.getSpellcheckedWords(_.words(command));
-  }
-  
-  /**
-   * Returns a list of words, with each word having a list of potential spelling options.
-   */
-  private getSpellcheckedWords(words: string[]): string[][] {
-    return _.map(words, (word) => {
-      if (this.spellcheck.isCorrect(word)) {
-        // Always wrap in an array for each looping.
-        return [word];
-      }
-      
-      /** Lowercased word for better spellchecking. */
-      const lowercaseWord: string = word.toLocaleLowerCase();
-      
-      // Get the spelling corrections.
-      const corrections = this.spellcheck.getCorrections(word, 1);
-      // Add the original word to the front, since it's still probably correct.
-      corrections.unshift(word);
-
-      return corrections;
-    });
-  }
-  
-  private addSpellcheckedWordToCommands(commands: string[], word: string): void {
-    const newCommands: string[] = [];
-    
-    _.reduce(commands, (commands: string[], command: string): string[] => {
-      commands.push(command + ' ' + word);
-      return commands;
-    }, []);
-    
-    
   }
 
   /**
@@ -378,8 +327,11 @@ class NaturalLanguageCommander {
       }
     }
 
+    // Do some regex-readying on the utterance.
+    utterance = this.replaceCommonMispellings(utterance);
     utterance = this.replaceSpacesForRegexp(utterance);
     utterance = this.replaceBracesForRegexp(utterance);
+    
     // Add the start carat, so this only matches the start of commands,
     // which helps with collisions.
     utterance = '^\\s*' + utterance;
@@ -391,6 +343,29 @@ class NaturalLanguageCommander {
       // Store the mapping for later retrieval.
       mapping: slotMapping
     };
+  }
+
+  /**
+   * For any word in the utterance that has common misspellings, replace it with
+   * a group that catches them.
+   * @param utterance - The utterance.
+   * @returns the utterance with replacements.
+   */
+  private replaceCommonMispellings(utterance: string): string {
+    // Split utterance into words, removing duplicates.
+    const words = _.chain(utterance).words().uniq().value();
+    
+    _.forEach(words, (word) => {
+      // Get the mistake checker, if there is one.
+      const mistakeReplacement = commonMistakes(word);
+      
+      if (mistakeReplacement) {
+        // Replace all instances of the word with the replacement, if there is one.
+        utterance = utterance.replace(new RegExp(word, 'ig'), mistakeReplacement);
+      }
+    });
+    
+    return utterance;
   }
 
   /** Replace runs of spaces with the space character, for better matching. */

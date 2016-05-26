@@ -7,7 +7,6 @@ import _ = require('lodash');
 import moment = require('moment-timezone');
 
 import nlc, {ISlotType} from './naturalLanguageCommander';
-import * as utils from './nlcUtils';
 
 // TODO: Make this configurable.
 /** The timezone to use for relative dates. */

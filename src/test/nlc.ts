@@ -247,5 +247,22 @@ describe('NLC', () => {
       );
     });
   });
+  
+  describe('common mispellings', () => {
+    it('should be caught', (done) => {
+      const GOOD_DEFINITELY = 'definitely';
+      const BAD_DEFINITELY = 'definately';
+      
+      nlc.registerIntent({
+        intent: 'SPELLING_TEST',
+        callback: matchCallback,
+        utterances: [
+          `test ${GOOD_DEFINITELY}`
+        ]
+      });
+      
+      expectCommandToMatch(nlc, `test ${BAD_DEFINITELY}`, matchCallback, noMatchCallback, done);
+    });
+  })
 });
 
