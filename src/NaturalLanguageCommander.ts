@@ -55,15 +55,23 @@ type SlotMapping = {
   [slotName: string]: any;
 }
 
+/** Holds registered natural language commands. */
 class NaturalLanguageCommander {
   private slotTypes: { [name: string]: ISlotType } = {};
   private intents: IIntent[] = [];
   private matchers: IUtteranceMatcher[] = [];
 
-  /** Holds registered natural language commands. */
-  constructor () {
+  /**
+   * @param spellcheckCorpus - An array of words to use as the corpus for the spellchecker.
+   */
+  constructor (spellcheckCorpus?: string[]) {
     // Add the standard slot types.
     _.forOwn(standardSlots, this.addSlotType);
+    
+    // Set up the spellchecker.
+    if (spellcheckCorpus) {
+      this.spellcheck = new natural.Spellcheck(spellcheckCorpus);
+    }
   }
 
   /**
@@ -140,6 +148,52 @@ class NaturalLanguageCommander {
     }
 
     return deferred.promise;
+  }
+
+  private getSpellcheckedCommand(command: string) {
+    // Just return the command if there's no spellchecker, or the command is too long.
+    if (!this.spellcheck || command.length > 255) {
+      return [command];
+    }
+    
+    /** Possible commands, based on the spellchecker. */
+    const commands: string[] = [''];
+    
+    /** The command split into words. */
+    const checkedWords = this.getSpellcheckedWords(_.words(command));
+  }
+  
+  /**
+   * Returns a list of words, with each word having a list of potential spelling options.
+   */
+  private getSpellcheckedWords(words: string[]): string[][] {
+    return _.map(words, (word) => {
+      if (this.spellcheck.isCorrect(word)) {
+        // Always wrap in an array for each looping.
+        return [word];
+      }
+      
+      /** Lowercased word for better spellchecking. */
+      const lowercaseWord: string = word.toLocaleLowerCase();
+      
+      // Get the spelling corrections.
+      const corrections = this.spellcheck.getCorrections(word, 1);
+      // Add the original word to the front, since it's still probably correct.
+      corrections.unshift(word);
+
+      return corrections;
+    });
+  }
+  
+  private addSpellcheckedWordToCommands(commands: string[], word: string): void {
+    const newCommands: string[] = [];
+    
+    _.reduce(commands, (commands: string[], command: string): string[] => {
+      commands.push(command + ' ' + word);
+      return commands;
+    }, []);
+    
+    
   }
 
   /**

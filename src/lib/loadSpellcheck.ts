@@ -13,7 +13,7 @@ function loadSpellcheck(): void {
   deferred = new Deferred();
   
   // Parse some text for the spellchecker.
-  fs.readFile('./src/lib/big.txt', (error: any, data: any) => {
+  fs.readFile('./lib/big.txt', (error: any, data: any) => {
     if (error) {
       console.log('Spellcheck load error!', error);
       deferred.reject(error);
