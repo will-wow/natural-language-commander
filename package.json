@@ -2,11 +2,18 @@
   "name": "natural-language-commander",
   "version": "0.0.0",
   "description": "A tool for connecting natural language commands with callbacks.",
+  "homepage": "https://github.com/whenther/natural-language-commander",
+  "bugs": "https://github.com/whenther/natural-language-commander/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whenther/natural-language-commander.git"
+  },
   "main": "dist/nlc.js",
   "scripts": {
     "test": "mocha --opts ./mocha.opts",
     "build": "tsc && browserify -o dist/nlc.js -e dist/NaturalLanguageCommander.js --standalone nlc && uglifyjs dist/nlc.js -o dist/nlc.min.js",
-    "prebuild": "rimraf dist"
+    "prebuild": "rimraf dist",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "nlp",
