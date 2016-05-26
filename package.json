@@ -2,9 +2,11 @@
   "name": "natural-language-commander",
   "version": "0.0.0",
   "description": "A tool for connecting natural language commands with callbacks.",
-  "main": "nlc.ts",
+  "main": "dist/nlc.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --opts ./mocha.opts"
+    "test": "mocha --opts ./mocha.opts",
+    "build": "tsc && browserify -o dist/nlc.js -e dist/NaturalLanguageCommander.js --standalone nlc && uglifyjs dist/nlc.js -o dist/nlc.min.js",
+    "prebuild": "rimraf dist"
   },
   "keywords": [
     "nlp",
@@ -13,13 +15,16 @@
   "author": "Will Lee-Wagner <will@whentheresawill.net>",
   "license": "MIT",
   "devDependencies": {
+    "browserify": "^13.0.1",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
-    "del": "^2.2.0",
     "mocha": "^2.5.1",
+    "rimraf": "^2.5.2",
     "ts-node": "^0.7.3",
     "typescript": "^1.8.10",
-    "typings": "^1.0.4"
+    "typings": "^1.0.4",
+    "uglify-js": "^2.6.2",
+    "uglifyify": "^3.0.1"
   },
   "dependencies": {
     "es6-promise": "^3.2.1",

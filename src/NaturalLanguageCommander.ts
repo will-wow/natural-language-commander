@@ -3,46 +3,10 @@ import _ = require('lodash');
 import promise = require('es6-promise');
 import Deferred from './lib/Deferred';
 import commonMistakes from './lib/commonMistakes';
-import * as standardSlots from './standardSlots';
+import * as standardSlots from './lib/standardSlots';
+import {SlotTypeFunction, SlotTypeItem, ISlotType, IIntentSlot, IIntent} from './lib/nlcInterfaces';
 
 const Promise = promise.Promise;
-
-export type SlotTypeFunction = (message: string) => any;
-export type SlotTypeItem = string | string[] | RegExp | SlotTypeFunction;
-
-/** A slot type to be used in intents. */
-export type ISlotType = {
-  /** The slot type name. */
-  type: string;
-  /** The associated options */
-  options: SlotTypeItem;
-  /** The first-round matcher for the regex. */
-  baseMatcher?: string;
-}
-
-/** A slot to associate with an intent. */
-export type IIntentSlot = {
-  /** The name used in the associated utterances. */
-  name: string;
-  /** The slot type. */
-  type: string;
-}
-
-export type IIntent = {
-  /** The intent name. */
-  intent: string;
-  /** The callback to run when the intent matches. */
-  callback: ((...slots: (string | any)[]) => void) | ((data: any, ...slots: string[]) => void);
-  /**
-   * The slots used in the utterances. Matched text will be returned as arguments
-   * to the intent callback, in order.
-   */
-  slots?: IIntentSlot[];
-  /**
-   * Array of utterances to match, including slots like {SlotName}
-   */
-  utterances: string[] | string[][];
-}
 
 /** Internal utterance matcher. */
 interface IUtteranceMatcher {
@@ -409,4 +373,5 @@ class NaturalLanguageCommander {
   }
 }
 
-export default NaturalLanguageCommander;
+// Use a standard npm export for post-transpile node compatibility.
+export = NaturalLanguageCommander;
