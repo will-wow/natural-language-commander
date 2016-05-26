@@ -263,6 +263,34 @@ describe('NLC', () => {
       
       expectCommandToMatch(nlc, `test ${BAD_DEFINITELY}`, matchCallback, noMatchCallback, done);
     });
-  })
+    
+    it('should be caught but not interfere with slots.', (done) => {
+      const GOOD_DEFINITELY = 'definitely';
+      const BAD_DEFINITELY = 'definately';
+      
+      nlc.registerIntent({
+        intent: 'SPELLING_TEST',
+        callback: matchCallback,
+        slots: [
+          {
+            name: GOOD_DEFINITELY,
+            type: 'STRING'
+          }
+        ],
+        utterances: [
+          `test {${GOOD_DEFINITELY}} ${GOOD_DEFINITELY}`
+        ]
+      });
+      
+      expectCommandToMatchWith(
+        nlc, 
+        `test ${BAD_DEFINITELY} ${BAD_DEFINITELY}`, 
+        [BAD_DEFINITELY],
+        matchCallback, 
+        noMatchCallback, 
+        done
+      );
+    });
+  });
 });
 
