@@ -1,7 +1,7 @@
 import chai = require('chai');
 const spies = require('chai-spies');
 
-import NLC from '../NaturalLanguageCommander';
+import NLC = require('../NaturalLanguageCommander');
 import Deferred from '../lib/Deferred';
 
 chai.use(spies);
