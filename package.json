@@ -17,8 +17,11 @@
     "prepublish": "npm run build"
   },
   "keywords": [
+    "natural language processing",
     "nlp",
-    "bots"
+    "commands",
+    "bots",
+    "hubot"
   ],
   "author": "Will Lee-Wagner <will@whentheresawill.net>",
   "license": "MIT",
