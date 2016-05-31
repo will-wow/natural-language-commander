@@ -8,7 +8,6 @@
   "globalDependencies": {
     "moment-node": "registry:dt/moment-node#2.11.1+20160511043338",
     "moment-timezone": "registry:dt/moment-timezone#0.2.5+20160329220348",
-    "natural": "registry:dt/natural#0.2.1+20160316155526",
     "node": "registry:env/node#4.0.0+20160507210304"
   },
   "globalDevDependencies": {
