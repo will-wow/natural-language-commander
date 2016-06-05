@@ -62,8 +62,20 @@ unmatched commands is a good way to find utterances you hadn't thought of.
 
 Installation
 ------------
+Install from npm with
 ```
 npm install natural-language-commander --save
+```
+
+And use in node with:
+```javascript
+var NLC = require('natural-language-commander');
+var nlc = new NLC();
+```
+or with TypeScript:
+```typescript
+import NLC = require('natural-language-commander');
+const nlc = new NLC();
 ```
 
 NLC is written in TypeScript, and comes with its d.ts definition
@@ -87,7 +99,7 @@ intent will have many of these.
 ### Slots
 A *slot* is essentially an argument for an intent, which you expect
 to show up in a certain place in an utterance. It's often a noun,
-and is the `{Item}` in `'add {Item}to my todo list'`.
+and is the `{Item}` in `'add {Item} to my todo list'`.
 Checking for slots part of matching a command to an utterance,
 and the data in the slot gets passed along to the callback.
 
