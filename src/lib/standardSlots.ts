@@ -49,7 +49,7 @@ export const NUMBER: ISlotType = {
     return isNaN(maybeNumber) ? undefined : maybeNumber;
   },
   // Only try to match a single run of numbers and valid formatters.
-  baseMatcher: '[\d\.,]'
+  baseMatcher: '[\\d\\.,]+'
 };
 
 export const DATE: ISlotType = {

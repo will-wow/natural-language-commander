@@ -108,6 +108,76 @@ describe('NLC', () => {
       });
     });
 
+    describe('WORD', () => {
+      beforeEach(() => {
+        // Register an intent with a WORD.
+        nlc.registerIntent({
+          intent: 'WORD_TEST',
+          callback: matchCallback,
+          slots: [
+            {
+              name: 'Word',
+              type: 'WORD'
+            }
+          ],
+          utterances: [
+            'test {Word} test'
+          ]
+        });
+      });
+
+      it('should match a single word', (done) => {
+        expectCommandToMatch('test test test', done);
+      });
+
+      it('should not match multiple words', (done) => {
+        expectCommandNotToMatch('test too many test test', done);
+      });
+    });
+
+    describe('NUMBER', () => {
+      beforeEach(() => {
+        // Register an intent with a NUMBER.
+        nlc.registerIntent({
+          intent: 'NUMBER_TEST',
+          callback: matchCallback,
+          slots: [
+            {
+              name: 'Number',
+              type: 'NUMBER'
+            }
+          ],
+          utterances: [
+            `it's over {Number}!!!`
+          ]
+        });
+      });
+
+      it('should match a number', (done) => {
+        expectCommandToMatch(`it's over 9000!!!`, done);
+      });
+
+      it('should match a number with commas', (done) => {
+        expectCommandToMatch(`it's over 9,000!!!`, done);
+      });
+      
+      it('should match a number with decimals', (done) => {
+        expectCommandToMatch(`it's over 9,000.01!!!`, done);
+      });
+
+      it('should not match non-numbers', (done) => {
+        expectCommandNotToMatch(`it's over john`, done);
+      });
+      
+      it('should return a number, not a string', (done) => {
+        expectCommandToMatchWith(
+          `it's over 9,000.01!!!`,
+          [ 9000.01 ],
+          done
+        );
+      });
+    });
+
     describe('DATE', () => {
       beforeEach(() => {
         // Register an intent with a DATE.
