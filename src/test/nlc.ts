@@ -1,3 +1,4 @@
+import _ = require('lodash');
 import chai = require('chai');
 const spies = require('chai-spies');
 
@@ -392,6 +393,70 @@ describe('NLC', () => {
         
         it('should get the return value of the function when matched', (done) => {
           expectCommandToMatchWith(`here's a small word: taco`, [4], done);
+        });
+      });
+      
+      describe('base matchers', () => {
+        it('should not restrict slots without a base matcher', (done) => {
+          // Add a type without a baseMatcher that looks for the word 'first'
+          nlc.addSlotType({
+            type: 'FIRST',
+            matcher: 'first'
+          });
+          
+          nlc.registerIntent({
+            intent: 'COLLISION_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'First',
+                type: 'FIRST'
+              },
+              {
+                name: 'Second',
+                type: 'STRING'
+              }
+            ],
+            utterances: [
+              '{First} {Second}'
+            ]
+          });
+          
+          // In this case, the FIRST slot got 'first followed by many more', which
+          // didn't match.
+          expectCommandNotToMatch('first followed by many more words', done);
+        });
+        
+        it('should be able to restrict slot matches to a single word', (done) => {
+          nlc.addSlotType({
+            type: 'FIRST',
+            matcher: 'first',
+            baseMatcher: '\\w+'
+          });
+          
+          nlc.registerIntent({
+            intent: 'COLLISION_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'First',
+                type: 'FIRST'
+              },
+              {
+                name: 'Second',
+                type: 'STRING'
+              }
+            ],
+            utterances: [
+              '{First} {Second}'
+            ]
+          });
+          
+          expectCommandToMatchWith(
+            'first followed by many more words', 
+            [ 'first', 'followed by many more words' ],
+            done
+          );
         });
       });
     });

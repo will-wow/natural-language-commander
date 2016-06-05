@@ -22,20 +22,35 @@ const DATE_FORMATS = [
   'YYYY-M-D'
 ];
 
+/** A string of any length. */
 export const STRING: ISlotType = {
   type: 'STRING',
   // Everything comes in as a string.
   matcher: _.identity
 };
 
+/** A string with only one word. */
+export const WORD: ISlotType = {
+  type: 'WORD',
+  matcher: _.identity,
+  baseMatcher: '\\w+'
+};
+
+/** A number */
 export const NUMBER: ISlotType = {
   type: 'NUMBER',
   matcher: (text: string): number => {
+    // Strip formatting commas.
+    text = text.replace(',', '');
+    // Try to convert the string to a number.
     const maybeNumber: number = _.toNumber(text);
 
+    // _.toNumber returns NaN if not a number.
     return isNaN(maybeNumber) ? undefined : maybeNumber;
-  }
-}
+  },
+  // Only try to match a single run of numbers and valid formatters.
+  baseMatcher: '[\d\.,]'
+};
 
 export const DATE: ISlotType = {
   type: 'DATE',
