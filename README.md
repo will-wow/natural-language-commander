@@ -94,7 +94,7 @@ The default slot types are:
 like `1/1/2016`, `Jan 1, 2016`, `2016-01-01`, etc., or a word like
 `today` or `tomorrow`.
 - `SLACK_USER`: A single word that starts with an `@`, like `@user`.
-- `SLACK_ROOM`: A single word that starts with an `#` or a `@`, like `#user`. 
+- `SLACK_ROOM`: A single word that starts with an `#` or a `@`, like `#room`. 
 
 Adding Slot Types
 -----------------

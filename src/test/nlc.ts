@@ -7,8 +7,13 @@ import Deferred from '../lib/Deferred';
 chai.use(spies);
 const expect = chai.expect;
 
+describe('NLC', () => {
+  let nlc: NLC;
+  let matchCallback;
+  let noMatchCallback;
+
 /** Expect a command to get a match. */
-function expectCommandToMatch(nlc: NLC, command: string, matchCallback, noMatchCallback, done) {
+function expectCommandToMatch(command: string, done) {
   nlc.handleCommand(command)
     .catch(noMatchCallback)
     .then(() => {
@@ -20,7 +25,7 @@ function expectCommandToMatch(nlc: NLC, command: string, matchCallback, noMatchC
 }
 
 /** Expect a command to get a match with paramaters. */
-function expectCommandToMatchWith(nlc: NLC, command: string, args: any[], matchCallback, noMatchCallback, done) {
+function expectCommandToMatchWith(command: string, args: any[], done) {
   nlc.handleCommand(command)
     .catch(noMatchCallback)
     .then(() => {
@@ -35,7 +40,7 @@ function expectCommandToMatchWith(nlc: NLC, command: string, args: any[], matchC
 }
 
 /** Expect a command not to get a match. */
-function expectCommandNotToMatch(nlc: NLC, command: string, matchCallback, noMatchCallback, done) {
+function expectCommandNotToMatch(command: string, done) {
   nlc.handleCommand(command)
     .catch(noMatchCallback)
     .then(() => {
@@ -45,11 +50,6 @@ function expectCommandNotToMatch(nlc: NLC, command: string, matchCallback, noMat
     })
     .catch((error) => done(error));
 }
-
-describe('NLC', () => {
-  let nlc: NLC;
-  let matchCallback;
-  let noMatchCallback;
 
   beforeEach(() => {
     nlc = new NLC();
@@ -71,11 +71,11 @@ describe('NLC', () => {
     });
 
     it('should match a simple input', (done) => {
-      expectCommandToMatch(nlc, 'test', matchCallback, noMatchCallback, done);
+      expectCommandToMatch('test', done);
     });
 
     it('should not match a simple bad input', (done) => {
-      expectCommandNotToMatch(nlc, 'tset', matchCallback, noMatchCallback, done);
+      expectCommandNotToMatch('tset', done);
     });
   });
 
@@ -99,11 +99,11 @@ describe('NLC', () => {
       });
 
       it('should match a string slot', (done) => {
-        expectCommandToMatch(nlc, 'test this is a string test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test this is a string test', done);
       });
 
       it('should not match a bad string slot', (done) => {
-        expectCommandNotToMatch(nlc, 'test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch('test test', done);
       });
     });
 
@@ -126,35 +126,35 @@ describe('NLC', () => {
       });
 
       it('should match a date slot with a MM/DD/YYYY date', (done) => {
-        expectCommandToMatch(nlc, 'test 10/10/2016 test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test 10/10/2016 test', done);
       });
 
       it('should match a date slot with a YYYY-MM-DD date', (done) => {
-        expectCommandToMatch(nlc, 'test 2016-10-10 test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test 2016-10-10 test', done);
       });
 
       it('should match a date slot with a MMM DD, YYYY date', (done) => {
-        expectCommandToMatch(nlc, 'test Oct 10, 2016 test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test Oct 10, 2016 test', done);
       });
 
       it('should match a date slot with a MMMM DD, YYYY date', (done) => {
-        expectCommandToMatch(nlc, 'test October 10, 2016 test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test October 10, 2016 test', done);
       });
 
       it('should match a date slot with "today"', (done) => {
-        expectCommandToMatch(nlc, 'test today test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test today test', done);
       });
 
       it('should match a date slot with "tomorrow"', (done) => {
-        expectCommandToMatch(nlc, 'test tomorrow test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test tomorrow test', done);
       });
 
       it('should match a date slot with "yesterday"', (done) => {
-        expectCommandToMatch(nlc, 'test yesterday test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test yesterday test', done);
       });
 
       it('should match a date slot with other strings', (done) => {
-        expectCommandNotToMatch(nlc, 'test foobar test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch('test foobar test', done);
       });
     });
 
@@ -177,11 +177,11 @@ describe('NLC', () => {
       });
 
       it('should match a name slot', (done) => {
-        expectCommandToMatch(nlc, 'test @test test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test @test test', done);
       });
 
       it('should not match a bad name slot', (done) => {
-        expectCommandNotToMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch('test test test', done);
       });
     });
 
@@ -204,15 +204,15 @@ describe('NLC', () => {
       });
 
       it('should match a room slot', (done) => {
-        expectCommandToMatch(nlc, 'test #test test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test #test test', done);
       });
 
       it('should match a name slot', (done) => {
-        expectCommandToMatch(nlc, 'test @test test', matchCallback, noMatchCallback, done);
+        expectCommandToMatch('test @test test', done);
       });
 
       it('should not match a bad room slot', (done) => {
-        expectCommandNotToMatch(nlc, 'test test test', matchCallback, noMatchCallback, done);
+        expectCommandNotToMatch('test test test', done);
       });
     });
   });
@@ -238,11 +238,8 @@ describe('NLC', () => {
       });
 
       expectCommandToMatchWith(
-        nlc,
         'test @name some more stuff test',
         ['@name', 'some more stuff'],
-        matchCallback,
-        noMatchCallback,
         done
       );
     });
@@ -261,7 +258,7 @@ describe('NLC', () => {
         ]
       });
       
-      expectCommandToMatch(nlc, `test ${BAD_DEFINITELY}`, matchCallback, noMatchCallback, done);
+      expectCommandToMatch(`test ${BAD_DEFINITELY}`, done);
     });
     
     it('should be caught but not interfere with slots.', (done) => {
@@ -283,11 +280,8 @@ describe('NLC', () => {
       });
       
       expectCommandToMatchWith(
-        nlc, 
         `test ${BAD_DEFINITELY} ${BAD_DEFINITELY}`, 
         [BAD_DEFINITELY],
-        matchCallback, 
-        noMatchCallback, 
         done
       );
     });
