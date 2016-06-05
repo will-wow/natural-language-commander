@@ -40,14 +40,17 @@ class NaturalLanguageCommander {
   public addSlotType = (slotType: ISlotType): void => {
     // Don't allow users to overwrite slot types.
     if (this.slotTypes[slotType.type]) {
-      throw new Error(`Slot Type ${slotType} already exists!`);
+      throw new Error(`NLC: Slot Type ${slotType} already exists!`);
     }
     
+    // Get the matcher, so the ts type guards work.
+    const matcher = slotType.matcher;
+    
     // Lowercase the slot type matcher.
-    if (_.isString(slotType.matcher)) {
-      slotType.matcher = slotType.matcher.toLowerCase();
-    } else if (_.isArray(slotType.matcher)) {
-      slotType.matcher = _.map(slotType.matcher, (option: string): string => option.toLowerCase());
+    if (_.isString(matcher)) {
+      slotType.matcher = matcher.toLowerCase();
+    } else if (_.isArray(matcher)) {
+      slotType.matcher = _.map(matcher, (option: string): string => option.toLowerCase());
     }
     
     // Save the new type.
@@ -83,6 +86,10 @@ class NaturalLanguageCommander {
       data = dataOrCommand;
     } else {
       command = dataOrCommand;
+    }
+
+    if (!_.isString(command)) {
+      throw new Error(`NLC: ${command} must be a string!`);
     }
 
     // Clean up the input.
@@ -194,7 +201,7 @@ class NaturalLanguageCommander {
   private checkSlotMatch(slotText: string, slotTypeName: string): any {
     // Handle unknown slot types.
     if (!this.slotTypes[slotTypeName]) {
-      throw new Error(`Slot Type ${slotTypeName} not found!`);
+      throw new Error(`NLC: Slot Type ${slotTypeName} not found!`);
     }
 
     const slotType: ISlotType = this.slotTypes[slotTypeName];

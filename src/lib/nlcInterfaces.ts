@@ -22,8 +22,6 @@ export type IIntentSlot = {
 export type IIntent = {
   /** The intent name. */
   intent: string;
-  /** The callback to run when the intent matches. */
-  callback: ((...slots: (string | any)[]) => void) | ((data: any, ...slots: string[]) => void);
   /**
    * The slots used in the utterances. Matched text will be returned as arguments
    * to the intent callback, in order.
@@ -32,5 +30,7 @@ export type IIntent = {
   /**
    * Array of utterances to match, including slots like {SlotName}
    */
-  utterances: string[] | string[][];
+  utterances: string[];
+  /** The callback to run when the intent matches. */
+  callback: ((...slots: (string | any)[]) => void) | ((data: any, ...slots: string[]) => void);
 }
