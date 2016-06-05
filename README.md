@@ -90,6 +90,8 @@ Default Slot Types
 ------------------
 The default slot types are:
 - `STRING`: Any string of any length.
+- `WORD`: A single word.
+- `NUMBER`: A number, which can include commas. Matches will be returned as numbers.
 - `DATE`: A string that's either a common date format
 like `1/1/2016`, `Jan 1, 2016`, `2016-01-01`, etc., or a word like
 `today` or `tomorrow`.
