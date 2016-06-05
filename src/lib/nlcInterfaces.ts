@@ -6,7 +6,7 @@ export type ISlotType = {
   /** The slot type name. */
   type: string;
   /** The associated options */
-  options: SlotTypeItem;
+  matcher: SlotTypeItem;
   /** The first-round matcher for the regex. */
   baseMatcher?: string;
 }

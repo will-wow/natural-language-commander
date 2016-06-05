@@ -43,6 +43,14 @@ class NaturalLanguageCommander {
       throw new Error(`Slot Type ${slotType} already exists!`);
     }
     
+    // Lowercase the slot type matcher.
+    if (_.isString(slotType.matcher)) {
+      slotType.matcher = slotType.matcher.toLowerCase();
+    } else if (_.isArray(slotType.matcher)) {
+      slotType.matcher = _.map(slotType.matcher, (option: string): string => option.toLowerCase());
+    }
+    
+    // Save the new type.
     this.slotTypes[slotType.type] = slotType;
   };
 
@@ -190,7 +198,7 @@ class NaturalLanguageCommander {
     }
 
     const slotType: ISlotType = this.slotTypes[slotTypeName];
-    const slotOptions: SlotTypeItem = slotType.options;
+    const slotOptions: SlotTypeItem = slotType.matcher;
 
     // Match the slot based on the type.
     if (_.isRegExp(slotOptions)) {
@@ -217,13 +225,9 @@ class NaturalLanguageCommander {
    * Check if the string matches the slotType, and return the type's string if it does.
    */
   private getStringSlot(slotText: string, slotType: string): string {
-    if (slotText === slotType) {
-      // Return the actual slotText if it matches directly.
+    if (slotText.toLowerCase() === slotType) {
       return slotText;
-    } else if (slotText.toLowerCase() === slotType) {
-      // If the lowercase matches, return the set type's capitaliztion.
-      return slotType;
-    }
+    } 
   }
 
   /**
@@ -237,12 +241,8 @@ class NaturalLanguageCommander {
    * Check if the string is contained in the string array, and return it if it does.
    */
   private getListSlotType(slotText: string, slotType: string[]): string {
-    if (_.includes(slotType, slotText)) {
-      // Return the actual slotText if it matches directly.
+    if (_.includes(slotType, slotText.toLowerCase())) {
       return slotText;
-    } else if (_.includes(slotType, slotText.toLowerCase())) {
-      // If the lowercase matches, return the text's lowercase capitaliztion.
-      return slotText.toLowerCase();
     }
   }
 

@@ -215,6 +215,187 @@ describe('NLC', () => {
         expectCommandNotToMatch('test test test', done);
       });
     });
+    
+    describe('custom', () => {
+      describe('duplicates', () => {
+        it('should throw errors', (done) => {
+          let error;
+          
+          nlc.addSlotType({
+            type: 'STRING_TYPE',
+            matcher: 'TEST'
+          });
+          
+          // Duplicate the type (this should throw an error),
+          try {
+            nlc.addSlotType({
+              type: 'STRING_TYPE',
+              matcher: 'ANOTHER_TEST'
+            });
+          }
+          catch (e) {
+            // Save the error message.
+            error = e;
+          }
+          
+          // There should have been an error message.
+          expect(error).to.exist;
+          done();
+        });
+      });
+      
+      describe('strings', () => {
+        beforeEach(() => {
+          // Add the custom slot type.
+          nlc.addSlotType({
+            type: 'STRING_TYPE',
+            matcher: 'TEST'
+          });
+
+          // Register an intent with the custom slot type.
+          nlc.registerIntent({
+            intent: 'CUSTOM_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'Custom',
+                type: 'STRING_TYPE'
+              }
+            ],
+            utterances: [
+              'this is a {Custom}'
+            ]
+          });
+        });
+        
+        it('should match a string slot', (done) => {
+          expectCommandToMatch('this is a TEST', done);
+        });
+        
+        it('should match a string slot with different case', (done) => {
+          expectCommandToMatch('this is a test', done);
+        });
+
+        it('should not match a bad string slot', (done) => {
+          expectCommandNotToMatch('this is a FAIL', done);
+        });
+      });
+      
+      describe('string arrays', () => {
+        beforeEach(() => {
+          // Add the custom slot type.
+          nlc.addSlotType({
+            type: 'STRING_ARRAY_TYPE',
+            matcher: [
+              'this',
+              'that'
+            ]
+          });
+
+          // Register an intent with the custom slot type.
+          nlc.registerIntent({
+            intent: 'CUSTOM_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'Custom',
+                type: 'STRING_ARRAY_TYPE'
+              }
+            ],
+            utterances: [
+              'check {Custom} out'
+            ]
+          });
+        });
+        
+        it('should match a string array slot', (done) => {
+          expectCommandToMatch('check this out', done);
+        });
+        
+        it('should match another string array', (done) => {
+          expectCommandToMatch('check THAT out', done);
+        });
+
+        it('should not match a bad string slot', (done) => {
+          expectCommandNotToMatch('check them out', done);
+        });
+      });
+      
+      describe('regular expressions', () => {
+        beforeEach(() => {
+          // Add the custom slot type.
+          nlc.addSlotType({
+            type: 'PHONE_TYPE',
+            matcher: /\d\d\d-\d\d\d-\d\d\d\d/
+          });
+
+          // Register an intent with the custom slot type.
+          nlc.registerIntent({
+            intent: 'CUSTOM_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'Phone',
+                type: 'PHONE_TYPE'
+              }
+            ],
+            utterances: [
+              'my phone number is {Phone}'
+            ]
+          });
+        });
+        
+        it('should match when the slot matches the regexp', (done) => {
+          expectCommandToMatch('my phone number is 555-555-5555', done);
+        });
+
+        it('should not match when the slot does not match the regexp', (done) => {
+          expectCommandNotToMatch('my phone number is in your phone already', done);
+        });
+      });
+      
+      describe('functions', () => {
+        beforeEach(() => {
+          // Add the custom slot type.
+          nlc.addSlotType({
+            type: 'SMALL_COUNT_TYPE',
+            matcher: (slot) => {
+              if (slot.length < 6) {
+                return slot.length;
+              }
+            }
+          });
+
+          // Register an intent with the custom slot type.
+          nlc.registerIntent({
+            intent: 'CUSTOM_TEST',
+            callback: matchCallback,
+            slots: [
+              {
+                name: 'Small',
+                type: 'SMALL_COUNT_TYPE'
+              }
+            ],
+            utterances: [
+              `here's a small word: {Small}`
+            ]
+          });
+        });
+        
+        it('should match when the slot matches the function', (done) => {
+          expectCommandToMatch(`here's a small word: taco`, done);
+        });
+
+        it('should not match when the slot does not match the function', (done) => {
+         expectCommandNotToMatch(`here's a small word: burrito`, done);
+        });
+        
+        it('should get the return value of the function when matched', (done) => {
+          expectCommandToMatchWith(`here's a small word: taco`, [4], done);
+        });
+      });
+    });
+    
   });
 
   describe('multiple slots', () => {
@@ -285,187 +466,7 @@ describe('NLC', () => {
         done
       );
     });
-
-    describe('custom', () => {
-      describe('duplicates', () => {
-        it('should throw errors', (done) => {
-          let error;
-          
-          nlc.addSlotType({
-            type: 'STRING_TYPE',
-            options: 'TEST'
-          });
-          
-          // Duplicate the type (this should throw an error),
-          try {
-            nlc.addSlotType({
-              type: 'STRING_TYPE',
-              options: 'ANOTHER_TEST'
-            });
-          }
-          catch (e) {
-            // Save the error message.
-            error = e;
-          }
-          
-          // There should have been an error message.
-          expect(error).to.exist;
-        });
-      });
-      
-      describe('strings', () => {
-        beforeEach(() => {
-          // Add the custom slot type.
-          nlc.addSlotType({
-            type: 'STRING_TYPE',
-            options: 'TEST'
-          });
-
-          // Register an intent with the custom slot type.
-          nlc.registerIntent({
-            intent: 'CUSTOM_TEST',
-            callback: matchCallback,
-            slots: [
-              {
-                name: 'Custom',
-                type: 'STRING_TYPE'
-              }
-            ],
-            utterances: [
-              'this is a {Custom}'
-            ]
-          });
-        });
-        
-        it('should match a string slot', (done) => {
-          expectCommandToMatch('this is a TEST', done);
-        });
-        
-        it('should match a string slot with different case', (done) => {
-          expectCommandToMatch('this is a test', done);
-        });
-
-        it('should not match a bad string slot', (done) => {
-          expectCommandNotToMatch('this is a FAIL', done);
-        });
-      });
-      
-      describe('string arrays', () => {
-        beforeEach(() => {
-          // Add the custom slot type.
-          nlc.addSlotType({
-            type: 'STRING_ARRAY_TYPE',
-            options: [
-              'this',
-              'that'
-            ]
-          });
-
-          // Register an intent with the custom slot type.
-          nlc.registerIntent({
-            intent: 'CUSTOM_TEST',
-            callback: matchCallback,
-            slots: [
-              {
-                name: 'Custom',
-                type: 'STRING_ARRAY_TYPE'
-              }
-            ],
-            utterances: [
-              'check {Custom} out'
-            ]
-          });
-        });
-        
-        it('should match a string array slot', (done) => {
-          expectCommandToMatch('check this out', done);
-        });
-        
-        it('should match another string array', (done) => {
-          expectCommandToMatch('check THAT out', done);
-        });
-
-        it('should not match a bad string slot', (done) => {
-          expectCommandNotToMatch('check them out', done);
-        });
-      });
-      
-      describe('regular expressions', () => {
-        beforeEach(() => {
-          // Add the custom slot type.
-          nlc.addSlotType({
-            type: 'PHONE_TYPE',
-            options: /\d\d\d-\d\d\d-\d\d\d\d/
-          });
-
-          // Register an intent with the custom slot type.
-          nlc.registerIntent({
-            intent: 'CUSTOM_TEST',
-            callback: matchCallback,
-            slots: [
-              {
-                name: 'Phone',
-                type: 'PHONE_TYPE'
-              }
-            ],
-            utterances: [
-              'my phone number is {Phone}'
-            ]
-          });
-        });
-        
-        it('should match when the slot matches the regexp', (done) => {
-          expectCommandToMatch('my phone number is 555-555-5555', done);
-        });
-
-        it('should not match when the slot does not matche the regexp', (done) => {
-          expectCommandNotToMatch('my phone number is in your phone already', done);
-        });
-      });
-      
-      describe('functions', () => {
-        beforeEach(() => {
-          // Add the custom slot type.
-          nlc.addSlotType({
-            type: 'SMALL_COUNT_TYPE',
-            options: (slot) => {
-              if (slot.length < 6) {
-                return slot.length;
-              }
-            }
-          });
-
-          // Register an intent with the custom slot type.
-          nlc.registerIntent({
-            intent: 'CUSTOM_TEST',
-            callback: matchCallback,
-            slots: [
-              {
-                name: 'Small',
-                type: 'SMALL_COUNT_TYPE'
-              }
-            ],
-            utterances: [
-              `here's a small word: {Small}`
-            ]
-          });
-        });
-        
-        it('should match when the slot matches the function', (done) => {
-          expectCommandToMatch(`here's a small word: taco`, done);
-        });
-
-        it('should not match when the slot does not match the function', (done) => {
-         expectCommandToMatch(`here's a small word: burrito`, done);
-        });
-        
-        it('should get the return value of the function when matched', (done) => {
-          expectCommandToMatchWith(`here's a small word: taco`, [4], done);
-        });
-      });
-    });
+    
   });
 
-
 });
-
