@@ -38,6 +38,11 @@ class NaturalLanguageCommander {
    * @param slotType
    */
   public addSlotType = (slotType: ISlotType): void => {
+    // Don't allow users to overwrite slot types.
+    if (this.slotTypes[slotType.type]) {
+      throw new Error(`Slot Type ${slotType} already exists!`);
+    }
+    
     this.slotTypes[slotType.type] = slotType;
   };
 
