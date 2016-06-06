@@ -1,12 +1,9 @@
 import _ = require('lodash');
 
-import promise = require('es6-promise');
 import Deferred from './lib/Deferred';
 import commonMistakes from './lib/commonMistakes';
 import * as standardSlots from './lib/standardSlots';
 import {SlotTypeFunction, SlotTypeItem, ISlotType, IIntentSlot, IIntent} from './lib/nlcInterfaces';
-
-const Promise = promise.Promise;
 
 /** Internal utterance matcher. */
 interface IUtteranceMatcher {
@@ -75,9 +72,9 @@ class NaturalLanguageCommander {
     });
   };
 
-  public handleCommand(data: any, command: string): promise.Promise<string>;
-  public handleCommand(command: string): promise.Promise<string>;
-  public handleCommand(dataOrCommand: any, command?: string): promise.Promise<string> {
+  public handleCommand(data: any, command: string): Promise<string>;
+  public handleCommand(command: string): Promise<string>;
+  public handleCommand(dataOrCommand: any, command?: string): Promise<string> {
     const deferred = new Deferred();
 
     // Handle overload.

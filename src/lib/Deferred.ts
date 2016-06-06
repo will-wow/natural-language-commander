@@ -1,7 +1,4 @@
-import promise = require('es6-promise');
-const Promise = promise.Promise;
-
-export type deferredPromise = promise.Promise<any>;
+export type deferredPromise = Promise<any>;
 
 class Deferred {
   public resolve: Function;
