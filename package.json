@@ -11,8 +11,8 @@
   "main": "dist/nlc.js",
   "scripts": {
     "test": "mocha --opts ./mocha.opts",
-    "build": "typings install && tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] -o dist/nlc.js --standalone NLC && uglifyjs dist/nlc.js -o dist/nlc.min.js",
-    "prebuild": "rimraf dist && mkdirp dist",
+    "build": "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
+    "prebuild": "rimraf dist && mkdirp dist && typings install",
     "postbuild": "rimraf dist/test",
     "prepublish": "npm run build"
   },
@@ -32,6 +32,7 @@
     "browserify": "^13.0.1",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
+    "derequire": "^2.0.3",
     "mkdirp": "^0.5.1",
     "mocha": "^2.5.1",
     "rimraf": "^2.5.2",
