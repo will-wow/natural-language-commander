@@ -12,6 +12,10 @@ interface IUtteranceMatcher {
   mapping: IIntentSlot[];
 }
 
+interface IDelay {
+  (callback: () => void): number;
+}
+
 type SlotMapping = {
   [slotName: string]: any;
 }
@@ -95,34 +99,39 @@ class NaturalLanguageCommander {
     /** Flag if there was a match */
     let foundMatch: boolean = false;
 
-    // TODO: Use nextTick here.
-    _.forEach(this.matchers, (matcher: IUtteranceMatcher) => {
-      const slotValues: SlotMapping = this.checkCommandForMatch(command, matcher);
+    // Use setImmediate in node and FF, the slower setTimeout otherwise,
+    // to delay the resolve so this is always async.
+    const delay: IDelay = typeof setImmediate === 'function' ? setImmediate : setTimeout;
 
-      if (slotValues) {
-        const orderedSlots: any[] = this.getOrderedSlots(matcher.intent, slotValues);
+    delay(() => {
+      _.forEach(this.matchers, (matcher: IUtteranceMatcher) => {
+        const slotValues: SlotMapping = this.checkCommandForMatch(command, matcher);
 
-        if (data) {
-          // Add the data as the first arg, if specified.
-          orderedSlots.unshift(data);
+        if (slotValues) {
+          const orderedSlots: any[] = this.getOrderedSlots(matcher.intent, slotValues);
+
+          if (data) {
+            // Add the data as the first arg, if specified.
+            orderedSlots.unshift(data);
+          }
+
+          // Call the callback with the slot values in order.
+          matcher.intent.callback.apply(null, orderedSlots);
+          // Resolve with the intent name, for reference.
+          deferred.resolve(matcher.intent.intent);
+          // Flag that a match was found.
+          foundMatch = true;
+          // Exit early.
+          return false;
         }
+      });
 
-        // Call the callback with the slot values in order.
-        matcher.intent.callback.apply(null, orderedSlots);
-        // Resolve with the intent name, for reference.
-        deferred.resolve(matcher.intent.intent);
-        // Flag that a match was found.
-        foundMatch = true;
-        // Exit early.
-        return false;
+      // Reject if no matches.
+      if (!foundMatch) {
+        deferred.reject();
       }
     });
-
-    // Reject if no matches.
-    if (!foundMatch) {
-      deferred.reject();
-    }
-
+    
     return deferred.promise;
   }
 
