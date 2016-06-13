@@ -1,11 +1,11 @@
 import _ = require('lodash');
 import chai = require('chai');
-const spies = require('chai-spies');
+import chaiSpies = require('chai-spies');
 
 import NLC = require('../NaturalLanguageCommander');
 import Deferred from '../lib/Deferred';
 
-chai.use(spies);
+chai.use(chaiSpies);
 const expect = chai.expect;
 
 describe('NLC', () => {
