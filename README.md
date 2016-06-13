@@ -3,6 +3,8 @@ natural-language-commander
 
 NLC is a tool for connecting natural language commands with callbacks.
 
+To see NLC in action, see the `todo-chat` [live demo](http://whenther.github.io/todo-chat), or check out its [repo](https://github.com/whenther/todo-chat). 
+
 It's somewhat inspired by Amazon's [Alexa interface](https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/defining-the-voice-interface#h2_sample_utterances) -
 so if you've integrated an app with the Amazon Echo, you should
 feel right at home.
