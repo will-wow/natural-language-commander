@@ -51,6 +51,6 @@
   },
   "typings": "./dist/NaturalLanguageCommander.d.ts",
   "engines": {
-    "node": "5.10.x"
+    "node": "4.x"
   }
 }
