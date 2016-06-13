@@ -1,8 +1,11 @@
-export type SlotTypeFunction = (message: string) => any;
+export interface SlotTypeFunction {
+  (message: string): any;
+}
+
 export type SlotTypeItem = string | string[] | RegExp | SlotTypeFunction;
 
 /** A slot type to be used in intents. */
-export type ISlotType = {
+export interface ISlotType {
   /** The slot type name. */
   type: string;
   /** The associated options */
@@ -12,14 +15,14 @@ export type ISlotType = {
 }
 
 /** A slot to associate with an intent. */
-export type IIntentSlot = {
+export interface IIntentSlot {
   /** The name used in the associated utterances. */
   name: string;
   /** The slot type. */
   type: string;
 }
 
-export type IIntent = {
+export interface IIntent {
   /** The intent name. */
   intent: string;
   /**
