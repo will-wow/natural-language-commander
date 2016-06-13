@@ -164,9 +164,9 @@ class NaturalLanguageCommander {
     }
 
     // If it matched, and there are no slots, success!
-    // Return an empty array of slots, so the function return truthy.
+    // Return an empty slotMapping, so the function returns truthy.
     if (matcher.mapping.length === 0) {
-      return [];
+      return {};
     }
 
     // Remove the global match, we don't need it.
@@ -183,7 +183,8 @@ class NaturalLanguageCommander {
       const slotData: any = this.checkSlotMatch(slotText, slot.type);
 
       // If the slot didn't match, note the bad match, and exit early.
-      if (!slotData) {
+      // Allow the value 0 to match.
+      if (slotData === undefined || slotData === '') {
         badMatch = true;
         return false;
       }

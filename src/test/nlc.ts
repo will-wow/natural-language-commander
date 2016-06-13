@@ -165,6 +165,10 @@ describe('NLC', () => {
         expectCommandToMatch(`it's over 9,000.01!!!`, done);
       });
 
+      it('should match a 0', (done) => {
+        expectCommandToMatch(`it's over 0!!!`, done);
+      });
+
       it('should not match non-numbers', (done) => {
         expectCommandNotToMatch(`it's over john`, done);
       });
