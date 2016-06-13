@@ -23,7 +23,7 @@
     "bots",
     "hubot"
   ],
-  "author": "Will Lee-Wagner <will@whentheresawill.net>",
+  "author": "Will Lee-Wagner <will@whentheresawill.net> (http://whentheresawill.net)",
   "license": "MIT",
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.9.0",
@@ -51,6 +51,6 @@
   },
   "typings": "./dist/NaturalLanguageCommander.d.ts",
   "engines": {
-    "node": "4.x"
+    "node": ">=4.0.0"
   }
 }
