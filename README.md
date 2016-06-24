@@ -304,7 +304,7 @@ const favoriteColor = 'blue';
 
 // Add a custom color slot type.
 nlc.addSlotType({
-  type: 'Colors',
+  type: 'Color',
   matcher: [
     'red',
     'orange',
