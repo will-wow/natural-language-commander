@@ -430,3 +430,7 @@ from passing in a gig of data and slowing down your server.
 
 Since NLC doesn't know how you're going to be using it (maybe you want users to be able to tell
 your bot long stories, who knows), it doesn't handle sanitization for you.
+
+Change Log
+----------
+[0.0.12] - Fixed inconsistent slot type name in the demo full example.
