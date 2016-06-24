@@ -14,6 +14,6 @@
   },
   "devDependencies": {
     "chai": "registry:npm/chai#3.5.0+20160415060238",
-    "chai-spies": "github:whenther/typed-chai-spies#e8c648250e2fab1e1af54b0bb684ccd44d19cab8"
+    "chai-spies": "registry:npm/chai-spies#0.7.1+20160614064916"
   }
 }
