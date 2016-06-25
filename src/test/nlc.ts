@@ -30,10 +30,12 @@ describe('NLC', () => {
     nlc.handleCommand(command)
       .catch(noMatchCallback)
       .then(() => {
-        // Run the expect first to get its this context.
-        const expectContext = expect(matchCallback);
-        // Pass the args list to with, along with the expect's context, to not break `this`.
-        expectContext.to.have.been.called.with.apply(expectContext, args);
+        // Get the context for the with() call, so appy doesn't break the this binding.
+        // Cast as any, because Chai.Assertion implements a length function, which
+        // is confusing the compiler I think.
+        const expectCalledWith: any = expect(matchCallback).to.have.been.called.with;
+
+        expectCalledWith.apply(expectCalledWith, args);
         expect(noMatchCallback).not.to.have.been.called();
         done();
       })
