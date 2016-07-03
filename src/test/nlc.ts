@@ -80,6 +80,12 @@ describe('NLC', () => {
     it('should not match a simple bad input', (done) => {
       expectCommandNotToMatch('tset', done);
     });
+
+    it('should match after an utterance is added', (done) => {
+      nlc.addUtterance('TEST', 'tset');
+
+      expectCommandToMatch('tset', done);
+    });
   });
 
   describe('slot types', () => {

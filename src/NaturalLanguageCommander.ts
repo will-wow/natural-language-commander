@@ -63,7 +63,8 @@ class NaturalLanguageCommander {
    * @param intent
    */
   public registerIntent = (intent: IIntent): boolean => {
-    if (_.includes(_.map(this.intents, 'name'), intent.intent)) {
+    // Don't allow duplicate intents.
+    if (this.doesIntentExist(intent.intent)) {
       return false;
     }
 
@@ -75,6 +76,33 @@ class NaturalLanguageCommander {
       this.matchers.push(this.getUtteranceMatcher(utterance, intent));
     });
   };
+
+  /**
+   * Add an utterance to an existing intent.
+   * @param intentName - The name of the intent to add to.
+   * @param utterance - The utterance string to add.
+   * @returns False if the intent was not found or the utterance already exists. Otherwise true.
+   */
+  public addUtterance(intentName: string, utterance: string): boolean {
+    // Get the intent by name.
+    const intent: IIntent = _.find(this.intents, (intent: IIntent): boolean => intent.intent === intentName);
+
+    // If not found, return.
+    if (!intent) {
+      return false;
+    }
+
+    // If the utterance already exists, return false.
+    if (_.includes(intent.utterances, utterance)) {
+      return false;
+    }
+
+    // Add the utterance to the intent.
+    intent.utterances.push(utterance);
+    // Add the utterance to the matchers list.
+    this.matchers.push(this.getUtteranceMatcher(utterance, intent));
+    return true;
+  }
 
   public handleCommand(data: any, command: string): Promise<string>;
   public handleCommand(command: string): Promise<string>;
@@ -389,6 +417,10 @@ class NaturalLanguageCommander {
     .replace(/[\u2018\u2019]/g, "'")
     // Replace smart double quotes.
     .replace(/[\u201C\u201D]/g, '"');
+  }
+
+  private doesIntentExist(intentName: string): boolean {
+    return _.includes(_.map(this.intents, 'intent'), intentName);
   }
 }
 

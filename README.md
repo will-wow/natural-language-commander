@@ -264,6 +264,10 @@ nlc.registerIntent({
 });
 ```
 
+You can also add an utterance to an existing intent (if you're generating them from some learning
+algorithm or something) by calling `nlc.addUtterance('INTENT_NAME', 'New utterance');`
+
+
 Handling Commands
 -----------------
 Once your intents are set up, you can start handling commands from users. To do that, call
@@ -433,4 +437,7 @@ your bot long stories, who knows), it doesn't handle sanitization for you.
 
 Change Log
 ----------
+[master]
+- Added addUtterance()
+
 [0.0.12] - Fixed inconsistent slot type name in the demo full example.
