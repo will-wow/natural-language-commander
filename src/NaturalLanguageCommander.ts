@@ -93,6 +93,12 @@ class NaturalLanguageCommander {
     return true;
   }
 
+  /**
+   * Handle a user's command by checking for a matching intent, and calling that intent's callback.
+   * @param data - Arbitrary data to pass to the callback.
+   * @param command - The command to match against.
+   * @returns a promise resolved with the name of the matched intent, or rejected if no match.
+   */
   public handleCommand(data: any, command: string): Promise<string>;
   public handleCommand(command: string): Promise<string>;
   public handleCommand(dataOrCommand: any, command?: string): Promise<string> {
