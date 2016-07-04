@@ -22,6 +22,7 @@ export interface IIntentSlot {
   type: string;
 }
 
+/** An intent, to be passed to NLC. */
 export interface IIntent {
   /** The intent name. */
   intent: string;
@@ -35,5 +36,46 @@ export interface IIntent {
    */
   utterances: string[];
   /** The callback to run when the intent matches. */
-  callback: ((...slots: (string | any)[]) => void) | ((data: any, ...slots: string[]) => void);
+  callback: ((...slotValues: any[]) => void) | ((data: any, ...slotValues: any[]) => void);
+}
+
+export interface IQuestionIntent {
+  /** The question intent name. */
+  intent: string;
+  /** The slot type the question is asking for. */
+  slotType: string;
+  /**
+   * Array of utterances to match. Slots must be named {Slot}.
+   * Defaults to checking for just the slot. 
+   */
+  utterances?: string[];
+  /**
+   * Asks the question. Called before setting up the answer listener.
+   * @param data - Any arbitrary data passed to nlc.ask(). Defaults to the userId.
+   * @param slotValue - The transformed value of the answer's slot.
+   */
+  questionCallback: (data: any) => void;
+  /**
+   * Called on sucessful match.
+   * @param data - Any arbitrary data passed to nlc.ask(). Defaults to the userId.
+   * @param slotValue - The transformed value of the answer's slot.
+   */
+  successCallback: (userId: any, slotValue: any) => void;
+  /**
+   * Called when the slot didn't match.
+   * @param data - Any arbitrary data passed to nlc.ask(). Defaults to the userId.
+   */
+  failCallback: (userId: any) => void;
+  /**
+   * If specified, NLC will listen for commands like "nevermind" or "cancel",
+   * and call this if the command matches them.
+   * @param data - Any arbitrary data passed to nlc.ask(). Defaults to the userId.
+   */
+  cancelCallback?: (userId: any) => void;
+}
+
+export interface IHandleCommandOptions {
+  command: string;
+  data?: any;
+  userId?: string;
 }

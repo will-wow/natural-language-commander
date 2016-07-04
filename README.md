@@ -438,6 +438,7 @@ your bot long stories, who knows), it doesn't handle sanitization for you.
 Change Log
 ----------
 [master]
+- Added questions (In Progress)
 - Added addUtterance()
 
 [0.0.12] - Fixed inconsistent slot type name in the demo full example.
