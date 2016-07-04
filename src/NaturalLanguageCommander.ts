@@ -50,6 +50,7 @@ class NaturalLanguageCommander {
   /**
    * Register an intent. Bound to this.
    * @param intent
+   * @returns true if added, false if the intent name already exists.
    */
   public registerIntent = (intent: IIntent): boolean => {
     // Don't allow duplicate intents.
