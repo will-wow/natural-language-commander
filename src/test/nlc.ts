@@ -616,4 +616,199 @@ describe('NLC', () => {
     
   });
 
+  describe('questions', () => {
+    let questionCallback;
+    let successCallback;
+    let cancelCallback;
+    let failCallback;
+
+    const USER_ID = '1';
+
+    beforeEach(() => {
+      questionCallback = chai.spy();
+      successCallback = chai.spy();
+      cancelCallback = chai.spy();
+      failCallback = chai.spy();
+
+      nlc.registerQuestionIntent({
+        intent: 'QUESTION',
+        slotType: 'NUMBER',
+        questionCallback: questionCallback,
+        successCallback: successCallback,
+        cancelCallback: cancelCallback,
+        failCallback: failCallback
+      });
+    });
+
+    it('should return true from ask when the question name exists', () => {
+      expect(nlc.ask(USER_ID, 'QUESTION')).to.be.true;
+    });
+
+    it('should return false from ask when the question name does not exist', () => {
+      expect(nlc.ask(USER_ID, 'BAD')).to.be.false;
+    });
+
+    it('should call the questionCallback on ask', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      setTimeout(() => {
+        expect(questionCallback).to.have.been.called();
+        done();
+      });
+    });
+
+    it('should not call the questionCallback on a bad ask', (done) => {
+      nlc.ask(USER_ID, 'BAD');
+
+      setTimeout(() => {
+        expect(questionCallback).not.to.have.been.called();
+        done();
+      });
+    });
+
+    it('should call the successCallback on a matching answer', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: '10'
+      }).then((questionName: string) => {
+        expect(successCallback).to.have.been.called();
+        done();
+      });
+    });
+
+    it('should call the failCallback on a non-matching answer', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: 'bad'
+      }).catch((questionName: string) => {
+        expect(failCallback).to.have.been.called();
+        done();
+      });
+    });
+
+    it('should call the cancelCallback on a cancel answer', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: 'nevermind'
+      }).then((questionName: string) => {
+        expect(cancelCallback).to.have.been.called();
+        done();
+      });
+    });
+
+    it('should match other commands when the user is incorrect', (done) => {
+      const matchCallback = chai.spy();
+
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.registerIntent({
+        intent: 'OTHER',
+        utterances: [
+          '10'
+        ],
+        callback: matchCallback
+      });
+
+      nlc.handleCommand({
+        userId: '2',
+        command: '10'
+      }).then((intentName: string) => {
+        expect(matchCallback).to.have.been.called();
+        expect(intentName).to.equal('OTHER');
+        done();
+      });
+    });
+
+    it('should match other commands when the user is not specified', (done) => {
+      const matchCallback = chai.spy();
+
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.registerIntent({
+        intent: 'OTHER',
+        utterances: [
+          '10'
+        ],
+        callback: matchCallback
+      });
+
+      nlc.handleCommand('10').then((intentName: string) => {
+        expect(matchCallback).to.have.been.called();
+        expect(intentName).to.equal('OTHER');
+        done();
+      });
+    });
+
+    it('should return the question name on successful answer matches', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: '10'
+      }).then((questionName: string) => {
+        expect(questionName).to.equal('QUESTION');
+        done();
+      });
+    });
+    
+    it('should return the question name on unsuccessful answer matches', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: 'bad'
+      }).catch((questionName: string) => {
+        expect(questionName).to.equal('QUESTION');
+        done();
+      });
+    });
+
+    it('should return the question name on cancelled answers', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: 'nevermind'
+      }).then((questionName: string) => {
+        expect(questionName).to.equal('QUESTION');
+        done();
+      });
+    });
+
+    it('should pass along the user ID by default', (done) => {
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        userId: '1',
+        command: '10'
+      }).then((questionName: string) => {
+        expect(successCallback).to.have.been.called.with('1', 10);
+
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should pass along data', (done) => {
+      const data = { foo: 'bar' };
+
+      nlc.ask(USER_ID, 'QUESTION');
+
+      nlc.handleCommand({
+        data,
+        userId: '1',
+        command: '10'
+      }).then((questionName: string) => {
+        expect(successCallback).to.have.been.called.with(data, 10);
+        done();
+      })
+      .catch(done);
+    });
+  });
 });

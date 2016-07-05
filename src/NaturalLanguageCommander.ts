@@ -32,6 +32,7 @@ class NaturalLanguageCommander {
     this.intentNames = [];
     this.intents = [];
     this.questions = {};
+    this.activeQuestions = {};
     this.matchers = [];
 
     // Add the standard slot types.
@@ -209,6 +210,7 @@ class NaturalLanguageCommander {
       userId = userIdOrQuestionName;
     } else {
       userId = dataOrUserId;
+      questionName = userIdOrQuestionName;
     }
 
     // Pull the question from the list of registered questions.
@@ -255,14 +257,23 @@ class NaturalLanguageCommander {
     // Try to answer the question with the command.
     question.answer(command, userId, data)
       .then(() => {
+        this.finishQuestion(userId);
         // If the answer matched, resolve with the question name.
         deferred.resolve(questionName);
       })
       .catch(() => {
+        this.finishQuestion(userId);
         // If the answer failed, reject with the question name, so any
         // logger knows what question failed.
         deferred.reject(questionName);
       });
+  }
+
+  /**
+   * Deactive a question once the user has answered it.
+   */
+  private finishQuestion(userId: string): void {
+    this.activeQuestions[userId] = undefined;
   }
 
   /** Handle a command normally. */
