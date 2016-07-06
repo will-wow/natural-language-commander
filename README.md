@@ -409,7 +409,7 @@ nlc.registerIntent({
   }
 });
 
-// Register a question for future use.
+// Register a question for asking the user their favorite color.
 nlc.registerQuestion({
   name: 'USER_FAVORITE_COLOR',
   slotType: 'Color',
@@ -421,8 +421,8 @@ nlc.registerQuestion({
       console.log(`meh.`);
     }
   },
-  cancelCallback: () => console.log(`That's not even a color!`),
-  failCallback: () => console.log(`Fine don't tell me then.`)
+  cancelCallback: () => console.log(`Fine don't tell me then.`),
+  failCallback: () => console.log(`That's not even a color!`)
 });
 
 /*
