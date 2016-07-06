@@ -641,15 +641,15 @@ describe('NLC', () => {
     });
 
     it('should return true from ask when the question name exists', () => {
-      expect(nlc.ask(USER_ID, 'QUESTION')).to.be.true;
+      expect(nlc.ask('QUESTION')).to.be.true;
     });
 
     it('should return false from ask when the question name does not exist', () => {
-      expect(nlc.ask(USER_ID, 'BAD')).to.be.false;
+      expect(nlc.ask('BAD')).to.be.false;
     });
 
     it('should call the questionCallback on ask', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       setTimeout(() => {
         expect(questionCallback).to.have.been.called();
@@ -658,7 +658,7 @@ describe('NLC', () => {
     });
 
     it('should not call the questionCallback on a bad ask', (done) => {
-      nlc.ask(USER_ID, 'BAD');
+      nlc.ask('BAD');
 
       setTimeout(() => {
         expect(questionCallback).not.to.have.been.called();
@@ -667,22 +667,18 @@ describe('NLC', () => {
     });
 
     it('should call the successCallback on a matching answer', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
-      nlc.handleCommand({
-        userId: '1',
-        command: '10'
-      }).then((questionName: string) => {
+      nlc.handleCommand('10').then((questionName: string) => {
         expect(successCallback).to.have.been.called();
         done();
       });
     });
 
     it('should call the failCallback on a non-matching answer', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: 'bad'
       }).catch((questionName: string) => {
         expect(failCallback).to.have.been.called();
@@ -691,10 +687,9 @@ describe('NLC', () => {
     });
 
     it('should call the cancelCallback on a cancel answer', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: 'nevermind'
       }).then((questionName: string) => {
         expect(cancelCallback).to.have.been.called();
@@ -705,7 +700,10 @@ describe('NLC', () => {
     it('should match other commands when the user is incorrect', (done) => {
       const matchCallback = chai.spy();
 
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask({
+        userId: USER_ID, 
+        question: 'QUESTION'
+      });
 
       nlc.registerIntent({
         intent: 'OTHER',
@@ -728,7 +726,10 @@ describe('NLC', () => {
     it('should match other commands when the user is not specified', (done) => {
       const matchCallback = chai.spy();
 
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask({
+        userId: USER_ID, 
+        question: 'QUESTION'
+      });
 
       nlc.registerIntent({
         intent: 'OTHER',
@@ -746,10 +747,9 @@ describe('NLC', () => {
     });
 
     it('should return the question name on successful answer matches', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: '10'
       }).then((questionName: string) => {
         expect(questionName).to.equal('QUESTION');
@@ -758,10 +758,9 @@ describe('NLC', () => {
     });
     
     it('should return the question name on unsuccessful answer matches', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: 'bad'
       }).catch((questionName: string) => {
         expect(questionName).to.equal('QUESTION');
@@ -770,10 +769,9 @@ describe('NLC', () => {
     });
 
     it('should return the question name on cancelled answers', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: 'nevermind'
       }).then((questionName: string) => {
         expect(questionName).to.equal('QUESTION');
@@ -781,24 +779,43 @@ describe('NLC', () => {
       });
     });
 
-    it('should pass along the user ID by default', (done) => {
-      nlc.ask(USER_ID, 'QUESTION');
+    it('should pass along just the slot by default', (done) => {
+      nlc.ask('QUESTION');
 
       nlc.handleCommand({
-        userId: '1',
         command: '10'
       }).then((questionName: string) => {
-        expect(successCallback).to.have.been.called.with('1', 10);
+        expect(successCallback).to.have.been.called.with(10);
 
         done();
       })
       .catch(done);
     });
 
-    it('should pass along data', (done) => {
+    it('should pass along the user ID when specified', (done) => {
+      nlc.ask({
+        userId: USER_ID, 
+        question: 'QUESTION'
+      });
+
+      nlc.handleCommand({
+        userId: USER_ID,
+        command: '10'
+      }).then((questionName: string) => {
+        expect(successCallback).to.have.been.called.with(USER_ID, 10);
+
+        done();
+      })
+      .catch(done);
+    });
+
+    it('should pass along data when specified', (done) => {
       const data = { foo: 'bar' };
 
-      nlc.ask(USER_ID, 'QUESTION');
+      nlc.ask({
+        userId: USER_ID, 
+        question: 'QUESTION'
+      });
 
       nlc.handleCommand({
         data,

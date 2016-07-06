@@ -2,9 +2,10 @@ import _ = require('lodash');
 
 import Deferred from './lib/Deferred';
 import * as standardSlots from './lib/standardSlots';
-import {ISlotType, IHandleCommandOptions, IIntent, IQuestionIntent} from './lib/nlcInterfaces';
+import {ISlotType, IHandleCommandOptions, IAskOptions, IIntent, IQuestionIntent} from './lib/nlcInterfaces';
 import Matcher from './lib/Matcher';
 import Question from './lib/Question';
+import {ANONYMOUS} from './lib/constants';
 
 interface IDelay {
   (callback: () => void): number;
@@ -160,7 +161,7 @@ class NaturalLanguageCommander {
     // Handle overload.
     let data: any;
     let userId: string;
-    if (_.isString(dataOrCommandOrOptions)) {
+    if (_.isString(dataOrCommandOrOptions) && !command) {
       // 2nd signature.
       command = dataOrCommandOrOptions;
     } else if (command) {
@@ -182,10 +183,22 @@ class NaturalLanguageCommander {
 
     // Delay to ensure this is async.
     delay(() => {
-      if (userId && this.activeQuestions[userId]) {
+      const intentName: string = this.handleNormalCommand(data, command);
+
+      // If the command was successful:
+      if (intentName) {
+        // Resolve with the intent name, for logging.
+        deferred.resolve(intentName);
+        return;
+      }
+
+      // If not successful, check if there's an active question for the user.
+      if (this.getActiveQuestion(userId)) {
+        // If there is one, answer it and handle the deferred in there.
         this.handleQuestionAnswer(deferred, data, command, userId);
       } else {
-        this.handleNormalCommand(deferred, data, command);
+        // Otherwise just reject the promise, since there was no match.
+        deferred.reject();
       }
     });
 
@@ -195,38 +208,42 @@ class NaturalLanguageCommander {
   /**
    * Have NLC listen ask a question and listen for an answer for a given user.
    * Calling this while a question is active for the user replace the old question.
-   * @param userId - any unqiue identifier for a user.
-   * @param questionName - An intent name from a question intent.
+   * @param question - An intent name from a question intent.
+   * @param options.data - arbitrary data to pass along.
+   * @param options.userId - any unqiue identifier for a user.
+   * @param options.question - An intent name from a question intent.
    * @returns false if questionName not found, true otherwise. 
    */
-  public ask(data: any, userId: string, questionName: string): boolean;
-  public ask(userId: string, questionName: string): boolean;
-  public ask(dataOrUserId: any | string, userIdOrQuestionName: string, questionName?: string): boolean {
+  public ask(options: IAskOptions): boolean;
+  public ask(question: string): boolean;
+  public ask(optionsOrQuestion: IAskOptions | string): boolean {
     // Handle overload.
     let data: any;
     let userId: string;
-    if (questionName) {
-      data = dataOrUserId;
-      userId = userIdOrQuestionName;
+    let questionName: string;
+
+    if (_.isString(optionsOrQuestion)) {
+      questionName = optionsOrQuestion;
     } else {
-      userId = dataOrUserId;
-      questionName = userIdOrQuestionName;
+      userId = optionsOrQuestion.userId;
+      data = optionsOrQuestion.data;
+      questionName = optionsOrQuestion.question;
     }
 
     // Pull the question from the list of registered questions.
     const question: Question = this.questions[questionName];
 
-    // Fail is the question wasn't set up.
+    // Fail if the question wasn't set up.
     if (!question) {
       return false;
     }
 
     // Make the question active.
-    this.activeQuestions[userId] = question;
+    this.setActiveQuestion(userId, question);
 
     // Ask the question after a delay.
     delay(() => {
-      question.ask(userId, data);
+      question.ask(data || userId);
     });
 
     return true;
@@ -248,14 +265,36 @@ class NaturalLanguageCommander {
     return _.includes(this.intentNames, intentName);
   }
 
+  /**
+   * Look up the active question for a user (if any). If the userId is undefined,
+   * check the anonymous user.
+   */
+  private getActiveQuestion(userId: string): Question {
+    return this.activeQuestions[userId || ANONYMOUS];
+  }
+
+  /**
+   * Set the active question for a user. 
+   */
+  private setActiveQuestion(userId: string, question: Question): void {
+    this.activeQuestions[userId || ANONYMOUS] = question;
+  }
+
+  /**
+   * Deactive a question once the user has answered it.
+   */
+  private finishQuestion(userId: string): void {
+    this.setActiveQuestion(userId, undefined);
+  }
+
   /** Handle a command for an active question. */
   private handleQuestionAnswer(deferred: Deferred, data: any, command: string, userId: string): void {
     // If this user has an active question, grab it.
-    const question: Question = this.activeQuestions[userId];
+    const question: Question = this.getActiveQuestion(userId);
     const questionName: string = question.intent.intent;
 
     // Try to answer the question with the command.
-    question.answer(command, userId, data)
+    question.answer(command, data || userId)
       .then(() => {
         this.finishQuestion(userId);
         // If the answer matched, resolve with the question name.
@@ -269,17 +308,10 @@ class NaturalLanguageCommander {
       });
   }
 
-  /**
-   * Deactive a question once the user has answered it.
-   */
-  private finishQuestion(userId: string): void {
-    this.activeQuestions[userId] = undefined;
-  }
-
   /** Handle a command normally. */
-  private handleNormalCommand(deferred: Deferred, data: any, command: string): void {
+  private handleNormalCommand(data: any, command: string): string {
     /** Flag if there was a match */
-    let foundMatch: boolean = false;
+    let foundMatchName: string;
     
     // Handle a normal command.
     _.forEach(this.matchers, (matcher: Matcher) => {
@@ -295,19 +327,14 @@ class NaturalLanguageCommander {
 
         // Call the callback with the slot values in order.
         matcher.intent.callback.apply(null, orderedSlots);
-        // Resolve with the intent name, for reference.
-        deferred.resolve(matcher.intent.intent);
         // Flag that a match was found.
-        foundMatch = true;
+        foundMatchName = matcher.intent.intent;
         // Exit early.
         return false;
       }
     });
 
-    // Reject if no matches.
-    if (!foundMatch) {
-      deferred.reject();
-    }
+    return foundMatchName;
   }
 }
 

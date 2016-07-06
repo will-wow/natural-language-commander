@@ -24,18 +24,24 @@ class Question {
     this.nlc.registerIntent(this.questionIntent);
   }
 
-  public ask(userId: string, data: any) {
-    this.intent.questionCallback(data || userId);
+  public ask(data: any) {
+    this.intent.questionCallback(data);
   }
 
   /**
    * Check an answer against the question matcher.
    */
-  public answer(answer: string, userId: string, data: any) {
-    return this.nlc.handleCommand({
-      data: data || userId, 
-      command: answer
-    }).catch(() => {
+  public answer(answer: string, data: any) {
+    let commandPromise;
+
+    // Handle the command, passing along data only if specified.
+    if (data === undefined) {
+      commandPromise = this.nlc.handleCommand(answer);
+    } else {
+      commandPromise = this.nlc.handleCommand(data, answer);
+    }
+
+    return commandPromise.catch(() => {
       // Handle the failure.
       this.intent.failCallback(data);
       // Rethrow to pass the error along.

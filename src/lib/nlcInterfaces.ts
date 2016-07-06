@@ -79,3 +79,9 @@ export interface IHandleCommandOptions {
   data?: any;
   userId?: string;
 }
+
+export interface IAskOptions {
+  question: string;
+  data?: any;
+  userId?: string;
+}
