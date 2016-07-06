@@ -1,22 +1,25 @@
 import _ = require('lodash');
 
 import NaturalLanguageCommander = require('../NaturalLanguageCommander');
-import {IIntent, IQuestionIntent} from './nlcInterfaces';
+import {IIntent, IQuestion} from './nlcInterfaces';
 
 /** Represents a registered question. */
 class Question {
+  public name: string;
   private nlc: NaturalLanguageCommander;
   private JUST_THE_SLOT_UTTERANCE: string[] = [ '{Slot}' ];
 
   constructor(
     parentNlc: NaturalLanguageCommander,
-    public intent: IQuestionIntent
+    private questionData: IQuestion
   ) {
     // Set up a new NLC instance, with access to the parent slot types.
     this.nlc = parentNlc.clone();
 
+    this.name = this.questionData.name;
+
     // Register the cancel intent first, so it matches first.
-    if (this.intent.cancelCallback) {
+    if (this.questionData.cancelCallback) {
       this.nlc.registerIntent(this.cancelIntent);
     }
 
@@ -25,7 +28,7 @@ class Question {
   }
 
   public ask(data: any) {
-    this.intent.questionCallback(data);
+    this.questionData.questionCallback(data);
   }
 
   /**
@@ -43,7 +46,7 @@ class Question {
 
     return commandPromise.catch(() => {
       // Handle the failure.
-      this.intent.failCallback(data);
+      this.questionData.failCallback(data);
       // Rethrow to pass the error along.
       throw new Error();
     });
@@ -51,24 +54,24 @@ class Question {
 
   /** A standard intent pulled from the question intent. */
   private get questionIntent(): IIntent {
-    const utterances = this.intent.utterances || this.JUST_THE_SLOT_UTTERANCE;
+    const utterances = this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
 
     return {
-      intent: this.intent.intent,
+      intent: this.name,
       slots: [
         {
           name: 'Slot',
-          type: this.intent.slotType
+          type: this.questionData.slotType
         }
       ],
       utterances,
-      callback: this.intent.successCallback
+      callback: this.questionData.successCallback
     };
   }
 
   /** An intent for cancelling the question. */
   private get cancelIntent(): IIntent {
-    const utterances = this.intent.utterances || this.JUST_THE_SLOT_UTTERANCE;
+    const utterances = this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
 
     return {
       intent: 'CANCEL',
@@ -79,7 +82,7 @@ class Question {
         }
       ],
       utterances: this.JUST_THE_SLOT_UTTERANCE,
-      callback: this.intent.cancelCallback
+      callback: this.questionData.cancelCallback
     };
   }
 }

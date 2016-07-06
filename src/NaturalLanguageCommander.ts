@@ -2,7 +2,7 @@ import _ = require('lodash');
 
 import Deferred from './lib/Deferred';
 import * as standardSlots from './lib/standardSlots';
-import {ISlotType, IHandleCommandOptions, IAskOptions, IIntent, IQuestionIntent} from './lib/nlcInterfaces';
+import {ISlotType, IHandleCommandOptions, IAskOptions, IIntent, IQuestion} from './lib/nlcInterfaces';
 import Matcher from './lib/Matcher';
 import Question from './lib/Question';
 import {ANONYMOUS} from './lib/constants';
@@ -87,21 +87,21 @@ class NaturalLanguageCommander {
   };
 
   /**
-   * Register a question intent. Bound to this.
+   * Register a question. Bound to this.
    * @param intent
    * @returns true if added, false if the intent name already exists.
    */
-  public registerQuestionIntent = (intent: IQuestionIntent): boolean => {
+  public registerQuestion = (questionData: IQuestion): boolean => {
     // Don't allow duplicate intents.
-    if (this.doesIntentExist(intent.intent)) {
+    if (this.doesIntentExist(questionData.name)) {
       return false;
     }
 
-    // Record the intent name for checking for duplicates.
-    this.intentNames.push(intent.intent);
+    // Record the question name for checking for duplicates.
+    this.intentNames.push(questionData.name);
 
     // Set up the question.
-    this.questions[intent.intent] = new Question(this, intent);
+    this.questions[questionData.name] = new Question(this, questionData);
   };
 
   /**
@@ -291,7 +291,7 @@ class NaturalLanguageCommander {
   private handleQuestionAnswer(deferred: Deferred, data: any, command: string, userId: string): void {
     // If this user has an active question, grab it.
     const question: Question = this.getActiveQuestion(userId);
-    const questionName: string = question.intent.intent;
+    const questionName: string = question.name;
 
     // Try to answer the question with the command.
     question.answer(command, data || userId)

@@ -630,8 +630,8 @@ describe('NLC', () => {
       cancelCallback = chai.spy();
       failCallback = chai.spy();
 
-      nlc.registerQuestionIntent({
-        intent: 'QUESTION',
+      nlc.registerQuestion({
+        name: 'QUESTION',
         slotType: 'NUMBER',
         questionCallback: questionCallback,
         successCallback: successCallback,

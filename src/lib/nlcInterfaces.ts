@@ -39,9 +39,9 @@ export interface IIntent {
   callback: ((...slotValues: any[]) => void) | ((data: any, ...slotValues: any[]) => void);
 }
 
-export interface IQuestionIntent {
+export interface IQuestion {
   /** The question intent name. */
-  intent: string;
+  name: string;
   /** The slot type the question is asking for. */
   slotType: string;
   /**
