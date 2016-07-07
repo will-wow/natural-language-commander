@@ -1,6 +1,6 @@
 {
   "name": "natural-language-commander",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A tool for connecting natural language commands with callbacks.",
   "homepage": "https://github.com/whenther/natural-language-commander",
   "bugs": "https://github.com/whenther/natural-language-commander/issues",
