@@ -24,6 +24,7 @@ class NaturalLanguageCommander {
   private questions: { [name: string]: Question };
   private activeQuestions: { [userId: string]: Question };
   private matchers: Matcher[];
+  private notFoundCallback: (data: any) => void;
 
   /**
    * Sets up the nlc instance with the default stop types.
@@ -35,6 +36,8 @@ class NaturalLanguageCommander {
     this.questions = {};
     this.activeQuestions = {};
     this.matchers = [];
+    // Noop the notFoundCallback.
+    this.notFoundCallback = () => {};
 
     // Add the standard slot types.
     _.forOwn(standardSlots, this.addSlotType);
@@ -103,6 +106,17 @@ class NaturalLanguageCommander {
     // Set up the question.
     this.questions[questionData.name] = new Question(this, questionData);
   };
+
+  /**
+   * Register a callback to be called when a command doesn't match.
+   * Isn't called when an answer command doesn't match, since that is handled
+   * elsewhere.
+   * @param data - Arbitrary data to pass to the callback.
+   * @param callback - Callback to run on failure. Optionally passed data from handleCommand.
+   */
+  public registerNotFound(callback: (data?: any) => void): void {
+    this.notFoundCallback = callback;
+  }
 
   /**
    * Get a fresh copy of this instance of NLC, but with the same slotTypes
@@ -197,7 +211,9 @@ class NaturalLanguageCommander {
         // If there is one, answer it and handle the deferred in there.
         this.handleQuestionAnswer(deferred, data, command, userId);
       } else {
-        // Otherwise just reject the promise, since there was no match.
+        // Otherwise call the not found handler, since there was no match.
+        this.notFoundCallback(data);
+        // Also reject the promise for logging.
         deferred.reject();
       }
     });
@@ -214,9 +230,11 @@ class NaturalLanguageCommander {
    * @param options.question - An intent name from a question intent.
    * @returns false if questionName not found, true otherwise. 
    */
-  public ask(options: IAskOptions): boolean;
-  public ask(question: string): boolean;
-  public ask(optionsOrQuestion: IAskOptions | string): boolean {
+  public ask(options: IAskOptions): Promise<boolean>;
+  public ask(question: string): Promise<boolean>;
+  public ask(optionsOrQuestion: IAskOptions | string): Promise<boolean> {
+    const deferred = new Deferred();
+
     // Handle overload.
     let data: any;
     let userId: string;
@@ -233,20 +251,26 @@ class NaturalLanguageCommander {
     // Pull the question from the list of registered questions.
     const question: Question = this.questions[questionName];
 
-    // Fail if the question wasn't set up.
-    if (!question) {
-      return false;
+    // If the question exists, make it active.
+    if (question) {
+      // Make the question active.
+      this.setActiveQuestion(userId, question);
     }
 
-    // Make the question active.
-    this.setActiveQuestion(userId, question);
-
-    // Ask the question after a delay.
+    // Delay for async.
     delay(() => {
-      question.ask(data || userId);
+      if (question) {
+        // Ask the question after a delay.
+        question.ask(data || userId);
+        // Resolve.
+        deferred.resolve(true);
+      } else {
+        // Reject the promise if the question isn't set up.
+        deferred.reject(false);
+      }
     });
 
-    return true;
+    return deferred.promise;
   }
 
   /**
@@ -258,7 +282,8 @@ class NaturalLanguageCommander {
       // Replace smart single quotes.
       .replace(/[\u2018\u2019]/g, "'")
       // Replace smart double quotes.
-      .replace(/[\u201C\u201D]/g, '"');
+      .replace(/[\u201C\u201D]/g, '"')
+      .trim();
   }
 
   private doesIntentExist(intentName: string): boolean {
