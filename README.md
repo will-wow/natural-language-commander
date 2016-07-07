@@ -361,6 +361,17 @@ nlc.handleCommand({
 });
 ```
 
+Handling commands that don't match
+--------------------------------
+To register a function to be called when a command doesn't match any intents,
+call `nlc.registerNotFound(callback: (data?: any) => void)`, passing in the callback.
+Note that this will not be called when an answer command doesn't match, since that 
+has its own seperate callback.
+
+You can also use `nlc.handleCommand(command).catch()` to catch bad commands - but
+that will also be called when an answer doesn't match, which may cause your bot to
+respond from both the catch callback and the question's failCallback.
+
 Full Example
 ------------
 Here's a full example of using NLC to guess a favorite color.
@@ -425,6 +436,8 @@ nlc.registerQuestion({
   failCallback: () => console.log(`That's not even a color!`)
 });
 
+nlc.registerNotFound(() => console.log(`Sorry I'm not sure what you mean.`));
+
 /*
  * Test some commands
  */
@@ -432,9 +445,9 @@ nlc.handleCommand('is your favorite color Blue?'); // 'Correct! Blue is my favor
 nlc.handleCommand('do you like blue'); // 'Correct! blue is my favorite color.'
 nlc.handleCommand('is red the best color?'); // 'Sorry, I don't really like red.'
 nlc.handleCommand('do you love Green'); // 'Sorry, I don't really like Green.'
-nlc.handleCommand('do you love tacos'); // No match
-nlc.handleCommand('do you think blue is pretty?'); // No match
-nlc.handleCommand('what is the meaning of life?'); // No match
+nlc.handleCommand('do you love tacos'); // Sorry I'm not sure what you mean.
+nlc.handleCommand('do you think blue is pretty?'); // Sorry I'm not sure what you mean.
+nlc.handleCommand('what is the meaning of life?'); // Sorry I'm not sure what you mean.
 nlc.ask('USER_FAVORITE_COLOR'); // What is your favorite color?
 nlc.handleCommand('blue'); // Mine too!
 nlc.ask('USER_FAVORITE_COLOR'); // What is your favorite color?
@@ -528,6 +541,9 @@ your bot long stories, who knows), it doesn't handle sanitization for you.
 
 Change Log
 ----------
+[0.1.2]
+- Added registerNotFound()
+
 [0.1.1]
 - Added questions
 - Added addUtterance()

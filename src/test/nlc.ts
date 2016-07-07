@@ -4,61 +4,18 @@ import chaiSpies = require('chai-spies');
 
 import NLC = require('../NaturalLanguageCommander');
 import Deferred from '../lib/Deferred';
+import TestUtils from './TestUtils';
 
 chai.use(chaiSpies);
 const expect = chai.expect;
 
 describe('NLC', () => {
   let nlc: NLC;
-  let matchCallback;
-  let noMatchCallback;
-
-  /** Expect a command to get a match. */
-  function expectCommandToMatch(command: string, done) {
-    nlc.handleCommand(command)
-      .catch(noMatchCallback)
-      .then(() => {
-        expect(matchCallback).to.have.been.called();
-        expect(noMatchCallback).not.to.have.been.called();
-        done();
-      })
-      .catch((error) => done(error));
-  }
-
-  /** Expect a command to get a match with paramaters. */
-  function expectCommandToMatchWith(command: string, args: any[], done) {
-    nlc.handleCommand(command)
-      .catch(noMatchCallback)
-      .then(() => {
-        // Get the context for the with() call, so appy doesn't break the this binding.
-        // Cast as any, because Chai.Assertion implements a length function, which
-        // is confusing the compiler I think.
-        const expectCalledWith: any = expect(matchCallback).to.have.been.called.with;
-
-        expectCalledWith.apply(expectCalledWith, args);
-        expect(noMatchCallback).not.to.have.been.called();
-        done();
-      })
-      .catch((error) => done(error));
-  }
-
-  /** Expect a command not to get a match. */
-  function expectCommandNotToMatch(command: string, done) {
-    nlc.handleCommand(command)
-      .catch(noMatchCallback)
-      .then(() => {
-        expect(matchCallback).not.to.have.been.called();
-        expect(noMatchCallback).to.have.been.called();
-        done();
-      })
-      .catch((error) => done(error));
-  }
+  let utils: TestUtils;
 
   beforeEach(() => {
     nlc = new NLC();
-
-    matchCallback = chai.spy();
-    noMatchCallback = chai.spy();
+    utils = new TestUtils(nlc);
   });
 
   describe('basic commands', () => {
@@ -66,7 +23,7 @@ describe('NLC', () => {
       // Register a simple intent.
       nlc.registerIntent({
         intent: 'TEST',
-        callback: matchCallback,
+        callback: utils.matchCallback,
         utterances: [
           'test'
         ]
@@ -74,17 +31,17 @@ describe('NLC', () => {
     });
 
     it('should match a simple input', (done) => {
-      expectCommandToMatch('test', done);
+      utils.expectCommandToMatch('test', done);
     });
 
     it('should not match a simple bad input', (done) => {
-      expectCommandNotToMatch('tset', done);
+      utils.expectCommandNotToMatch('tset', done);
     });
 
     it('should match after an utterance is added', (done) => {
       nlc.addUtterance('TEST', 'tset');
 
-      expectCommandToMatch('tset', done);
+      utils.expectCommandToMatch('tset', done);
     });
   });
 
@@ -94,7 +51,7 @@ describe('NLC', () => {
         // Register an intent with a STRING.
         nlc.registerIntent({
           intent: 'STRING_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'String',
@@ -108,11 +65,11 @@ describe('NLC', () => {
       });
 
       it('should match a string slot', (done) => {
-        expectCommandToMatch('test this is a string test', done);
+        utils.expectCommandToMatch('test this is a string test', done);
       });
 
       it('should not match a bad string slot', (done) => {
-        expectCommandNotToMatch('test test', done);
+        utils.expectCommandNotToMatch('test test', done);
       });
     });
 
@@ -121,7 +78,7 @@ describe('NLC', () => {
         // Register an intent with a WORD.
         nlc.registerIntent({
           intent: 'WORD_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'Word',
@@ -135,11 +92,11 @@ describe('NLC', () => {
       });
 
       it('should match a single word', (done) => {
-        expectCommandToMatch('test test test', done);
+        utils.expectCommandToMatch('test test test', done);
       });
 
       it('should not match multiple words', (done) => {
-        expectCommandNotToMatch('test too many test test', done);
+        utils.expectCommandNotToMatch('test too many test test', done);
       });
     });
 
@@ -148,7 +105,7 @@ describe('NLC', () => {
         // Register an intent with a NUMBER.
         nlc.registerIntent({
           intent: 'NUMBER_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'Number',
@@ -162,27 +119,27 @@ describe('NLC', () => {
       });
 
       it('should match a number', (done) => {
-        expectCommandToMatch(`it's over 9000!!!`, done);
+        utils.expectCommandToMatch(`it's over 9000!!!`, done);
       });
 
       it('should match a number with commas', (done) => {
-        expectCommandToMatch(`it's over 9,000!!!`, done);
+        utils.expectCommandToMatch(`it's over 9,000!!!`, done);
       });
       
       it('should match a number with decimals', (done) => {
-        expectCommandToMatch(`it's over 9,000.01!!!`, done);
+        utils.expectCommandToMatch(`it's over 9,000.01!!!`, done);
       });
 
       it('should match a 0', (done) => {
-        expectCommandToMatch(`it's over 0!!!`, done);
+        utils.expectCommandToMatch(`it's over 0!!!`, done);
       });
 
       it('should not match non-numbers', (done) => {
-        expectCommandNotToMatch(`it's over john`, done);
+        utils.expectCommandNotToMatch(`it's over john`, done);
       });
       
       it('should return a number, not a string', (done) => {
-        expectCommandToMatchWith(
+        utils.expectCommandToMatchWith(
           `it's over 9,000.01!!!`,
           [ 9000.01 ],
           done
@@ -195,7 +152,7 @@ describe('NLC', () => {
         // Register an intent with a DATE.
         nlc.registerIntent({
           intent: 'DATE_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'Date',
@@ -209,35 +166,35 @@ describe('NLC', () => {
       });
 
       it('should match a date slot with a MM/DD/YYYY date', (done) => {
-        expectCommandToMatch('test 10/10/2016 test', done);
+        utils.expectCommandToMatch('test 10/10/2016 test', done);
       });
 
       it('should match a date slot with a YYYY-MM-DD date', (done) => {
-        expectCommandToMatch('test 2016-10-10 test', done);
+        utils.expectCommandToMatch('test 2016-10-10 test', done);
       });
 
       it('should match a date slot with a MMM DD, YYYY date', (done) => {
-        expectCommandToMatch('test Oct 10, 2016 test', done);
+        utils.expectCommandToMatch('test Oct 10, 2016 test', done);
       });
 
       it('should match a date slot with a MMMM DD, YYYY date', (done) => {
-        expectCommandToMatch('test October 10, 2016 test', done);
+        utils.expectCommandToMatch('test October 10, 2016 test', done);
       });
 
       it('should match a date slot with "today"', (done) => {
-        expectCommandToMatch('test today test', done);
+        utils.expectCommandToMatch('test today test', done);
       });
 
       it('should match a date slot with "tomorrow"', (done) => {
-        expectCommandToMatch('test tomorrow test', done);
+        utils.expectCommandToMatch('test tomorrow test', done);
       });
 
       it('should match a date slot with "yesterday"', (done) => {
-        expectCommandToMatch('test yesterday test', done);
+        utils.expectCommandToMatch('test yesterday test', done);
       });
 
       it('should match a date slot with other strings', (done) => {
-        expectCommandNotToMatch('test foobar test', done);
+        utils.expectCommandNotToMatch('test foobar test', done);
       });
     });
 
@@ -246,7 +203,7 @@ describe('NLC', () => {
         // Register an intent with a SLACK_NAME.
         nlc.registerIntent({
           intent: 'SLACK_NAME_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'Name',
@@ -260,11 +217,11 @@ describe('NLC', () => {
       });
 
       it('should match a name slot', (done) => {
-        expectCommandToMatch('test @test test', done);
+        utils.expectCommandToMatch('test @test test', done);
       });
 
       it('should not match a bad name slot', (done) => {
-        expectCommandNotToMatch('test test test', done);
+        utils.expectCommandNotToMatch('test test test', done);
       });
     });
 
@@ -273,7 +230,7 @@ describe('NLC', () => {
         // Register an intent with a SLACK_ROOM.
         nlc.registerIntent({
           intent: 'SLACK_ROOM_TEST',
-          callback: matchCallback,
+          callback: utils.matchCallback,
           slots: [
             {
               name: 'Room',
@@ -287,15 +244,15 @@ describe('NLC', () => {
       });
 
       it('should match a room slot', (done) => {
-        expectCommandToMatch('test #test test', done);
+        utils.expectCommandToMatch('test #test test', done);
       });
 
       it('should match a name slot', (done) => {
-        expectCommandToMatch('test @test test', done);
+        utils.expectCommandToMatch('test @test test', done);
       });
 
       it('should not match a bad room slot', (done) => {
-        expectCommandNotToMatch('test test test', done);
+        utils.expectCommandNotToMatch('test test test', done);
       });
     });
     
@@ -338,7 +295,7 @@ describe('NLC', () => {
           // Register an intent with the custom slot type.
           nlc.registerIntent({
             intent: 'CUSTOM_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'Custom',
@@ -352,15 +309,15 @@ describe('NLC', () => {
         });
         
         it('should match a string slot', (done) => {
-          expectCommandToMatch('this is a TEST', done);
+          utils.expectCommandToMatch('this is a TEST', done);
         });
         
         it('should match a string slot with different case', (done) => {
-          expectCommandToMatch('this is a test', done);
+          utils.expectCommandToMatch('this is a test', done);
         });
 
         it('should not match a bad string slot', (done) => {
-          expectCommandNotToMatch('this is a FAIL', done);
+          utils.expectCommandNotToMatch('this is a FAIL', done);
         });
       });
       
@@ -378,7 +335,7 @@ describe('NLC', () => {
           // Register an intent with the custom slot type.
           nlc.registerIntent({
             intent: 'CUSTOM_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'Custom',
@@ -392,15 +349,15 @@ describe('NLC', () => {
         });
         
         it('should match a string array slot', (done) => {
-          expectCommandToMatch('check this out', done);
+          utils.expectCommandToMatch('check this out', done);
         });
         
         it('should match another string array', (done) => {
-          expectCommandToMatch('check THAT out', done);
+          utils.expectCommandToMatch('check THAT out', done);
         });
 
         it('should not match a bad string slot', (done) => {
-          expectCommandNotToMatch('check them out', done);
+          utils.expectCommandNotToMatch('check them out', done);
         });
       });
       
@@ -415,7 +372,7 @@ describe('NLC', () => {
           // Register an intent with the custom slot type.
           nlc.registerIntent({
             intent: 'CUSTOM_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'Phone',
@@ -429,11 +386,11 @@ describe('NLC', () => {
         });
         
         it('should match when the slot matches the regexp', (done) => {
-          expectCommandToMatch('my phone number is 555-555-5555', done);
+          utils.expectCommandToMatch('my phone number is 555-555-5555', done);
         });
 
         it('should not match when the slot does not match the regexp', (done) => {
-          expectCommandNotToMatch('my phone number is in your phone already', done);
+          utils.expectCommandNotToMatch('my phone number is in your phone already', done);
         });
       });
       
@@ -452,7 +409,7 @@ describe('NLC', () => {
           // Register an intent with the custom slot type.
           nlc.registerIntent({
             intent: 'CUSTOM_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'Small',
@@ -466,15 +423,15 @@ describe('NLC', () => {
         });
         
         it('should match when the slot matches the function', (done) => {
-          expectCommandToMatch(`here's a small word: taco`, done);
+          utils.expectCommandToMatch(`here's a small word: taco`, done);
         });
 
         it('should not match when the slot does not match the function', (done) => {
-         expectCommandNotToMatch(`here's a small word: burrito`, done);
+         utils.expectCommandNotToMatch(`here's a small word: burrito`, done);
         });
         
         it('should get the return value of the function when matched', (done) => {
-          expectCommandToMatchWith(`here's a small word: taco`, [4], done);
+          utils.expectCommandToMatchWith(`here's a small word: taco`, [4], done);
         });
       });
       
@@ -488,7 +445,7 @@ describe('NLC', () => {
           
           nlc.registerIntent({
             intent: 'COLLISION_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'First',
@@ -506,7 +463,7 @@ describe('NLC', () => {
           
           // In this case, the FIRST slot got 'first followed by many more', which
           // didn't match.
-          expectCommandNotToMatch('first followed by many more words', done);
+          utils.expectCommandNotToMatch('first followed by many more words', done);
         });
         
         it('should be able to restrict slot matches to a single word', (done) => {
@@ -518,7 +475,7 @@ describe('NLC', () => {
           
           nlc.registerIntent({
             intent: 'COLLISION_TEST',
-            callback: matchCallback,
+            callback: utils.matchCallback,
             slots: [
               {
                 name: 'First',
@@ -534,7 +491,7 @@ describe('NLC', () => {
             ]
           });
           
-          expectCommandToMatchWith(
+          utils.expectCommandToMatchWith(
             'first followed by many more words', 
             [ 'first', 'followed by many more words' ],
             done
@@ -549,7 +506,7 @@ describe('NLC', () => {
     it('should not collide when the first is a single word', (done) => {
       nlc.registerIntent({
         intent: 'COLLISION_TEST',
-        callback: matchCallback,
+        callback: utils.matchCallback,
         slots: [
           {
             name: 'Name',
@@ -565,7 +522,7 @@ describe('NLC', () => {
         ]
       });
 
-      expectCommandToMatchWith(
+      utils.expectCommandToMatchWith(
         'test @name some more stuff test',
         ['@name', 'some more stuff'],
         done
@@ -580,13 +537,13 @@ describe('NLC', () => {
 
       nlc.registerIntent({
         intent: 'SPELLING_TEST',
-        callback: matchCallback,
+        callback: utils.matchCallback,
         utterances: [
           `test ${GOOD_DEFINITELY}`
         ]
       });
 
-      expectCommandToMatch(`test ${BAD_DEFINITELY}`, done);
+      utils.expectCommandToMatch(`test ${BAD_DEFINITELY}`, done);
     });
 
     it('should be caught but not interfere with slots.', (done) => {
@@ -595,7 +552,7 @@ describe('NLC', () => {
 
       nlc.registerIntent({
         intent: 'SPELLING_TEST',
-        callback: matchCallback,
+        callback: utils.matchCallback,
         slots: [
           {
             name: GOOD_DEFINITELY,
@@ -607,7 +564,7 @@ describe('NLC', () => {
         ]
       });
 
-      expectCommandToMatchWith(
+      utils.expectCommandToMatchWith(
         `test ${BAD_DEFINITELY} ${BAD_DEFINITELY}`,
         [BAD_DEFINITELY],
         done
@@ -640,27 +597,29 @@ describe('NLC', () => {
       });
     });
 
-    it('should return true from ask when the question name exists', () => {
-      expect(nlc.ask('QUESTION')).to.be.true;
+    it('should resolve from ask when the question name exists', (done) => {
+      nlc.ask('QUESTION').then((status: boolean) => {
+        expect(status).to.be.true;
+        done();
+      });
     });
 
-    it('should return false from ask when the question name does not exist', () => {
-      expect(nlc.ask('BAD')).to.be.false;
+    it('should reject from ask when the question name does not exist', (done) => {
+      nlc.ask('BAD').catch((status: boolean) => {
+        expect(status).to.be.false;
+        done();
+      });
     });
 
     it('should call the questionCallback on ask', (done) => {
-      nlc.ask('QUESTION');
-
-      setTimeout(() => {
+      nlc.ask('QUESTION').then(() => {
         expect(questionCallback).to.have.been.called();
         done();
       });
     });
 
     it('should not call the questionCallback on a bad ask', (done) => {
-      nlc.ask('BAD');
-
-      setTimeout(() => {
+      nlc.ask('BAD').catch(() => {
         expect(questionCallback).not.to.have.been.called();
         done();
       });
@@ -698,8 +657,6 @@ describe('NLC', () => {
     });
 
     it('should match other commands when the user is incorrect', (done) => {
-      const matchCallback = chai.spy();
-
       nlc.ask({
         userId: USER_ID, 
         question: 'QUESTION'
@@ -710,22 +667,20 @@ describe('NLC', () => {
         utterances: [
           '10'
         ],
-        callback: matchCallback
+        callback: utils.matchCallback
       });
 
       nlc.handleCommand({
         userId: '2',
         command: '10'
       }).then((intentName: string) => {
-        expect(matchCallback).to.have.been.called();
+        expect(utils.matchCallback).to.have.been.called();
         expect(intentName).to.equal('OTHER');
         done();
       });
     });
 
     it('should match other commands when the user is not specified', (done) => {
-      const matchCallback = chai.spy();
-
       nlc.ask({
         userId: USER_ID, 
         question: 'QUESTION'
@@ -736,11 +691,11 @@ describe('NLC', () => {
         utterances: [
           '10'
         ],
-        callback: matchCallback
+        callback: utils.matchCallback
       });
 
       nlc.handleCommand('10').then((intentName: string) => {
-        expect(matchCallback).to.have.been.called();
+        expect(utils.matchCallback).to.have.been.called();
         expect(intentName).to.equal('OTHER');
         done();
       });
@@ -826,6 +781,24 @@ describe('NLC', () => {
         done();
       })
       .catch(done);
+    });
+  });
+
+  describe('not found callback', () => {
+    let notFoundCallback;
+    
+    beforeEach(() => {
+      notFoundCallback = chai.spy();
+
+      nlc.registerNotFound(notFoundCallback);
+    });
+
+    it('should get called when there is no match.', (done) => {
+      nlc.handleCommand('bad')
+      .catch(() => {
+        expect(notFoundCallback).to.have.been.called();
+      })
+      .then(done);
     });
   });
 });
