@@ -318,10 +318,13 @@ class NaturalLanguageCommander {
     const question: Question = this.getActiveQuestion(userId);
     const questionName: string = question.name;
 
+    // Finish the question before the answer is processed, in case the answer
+    // kicks off another question.
+    this.finishQuestion(userId);
+
     // Try to answer the question with the command.
     question.answer(command, data || userId)
       .then(() => {
-        this.finishQuestion(userId);
         // If the answer matched, resolve with the question name.
         deferred.resolve(questionName);
       })

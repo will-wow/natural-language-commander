@@ -34,7 +34,7 @@ class Question {
   /**
    * Check an answer against the question matcher.
    */
-  public answer(answer: string, data: any) {
+  public answer(answer: string, data: any): Promise<string> {
     let commandPromise;
 
     // Handle the command, passing along data only if specified.

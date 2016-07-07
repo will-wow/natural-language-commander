@@ -541,6 +541,9 @@ your bot long stories, who knows), it doesn't handle sanitization for you.
 
 Change Log
 ----------
+[0.1.3]
+- Fixed bug with nested questions.
+
 [0.1.2]
 - Added registerNotFound()
 

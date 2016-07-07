@@ -782,6 +782,31 @@ describe('NLC', () => {
       })
       .catch(done);
     });
+
+    it('should allow for nested questions', (done) => {
+      nlc.registerQuestion({
+        name: 'FIRST_QUESTION',
+        slotType: 'NUMBER',
+        questionCallback: () => {},
+        successCallback: () => nlc.ask('QUESTION'),
+        cancelCallback: () => {},
+        failCallback: () => {}
+      });
+
+
+      nlc.ask('FIRST_QUESTION')
+        .then(() => nlc.handleCommand('1'))
+        .then(() => {
+          return new Promise((resolve) => {
+            setTimeout(resolve, 10);
+          });
+        })
+        .then(() => nlc.handleCommand('2'))
+        .then(() => {
+          expect(successCallback).to.have.been.called();
+          done();
+        });
+    });
   });
 
   describe('not found callback', () => {
