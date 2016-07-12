@@ -49,20 +49,37 @@ export const WORD: ISlotType = {
   baseMatcher: '\\w+'
 };
 
+// Only tries to match a single run of numbers and valid formatters.
+const numberBaseMatcher = '[\\d,]+(?:\\.[\\d,]+)?';
+
+function numberMatcher(text: string): number {
+  // Strip formatting commas.
+  text = text.replace(/,/g, '');
+  // Try to convert the string to a number.
+  const maybeNumber: number = _.toNumber(text);
+
+  // _.toNumber returns NaN if not a number.
+  return isNaN(maybeNumber) ? undefined : maybeNumber;
+}
+
 /** A number */
 export const NUMBER: ISlotType = {
   type: 'NUMBER',
-  matcher: (text: string): number => {
-    // Strip formatting commas.
-    text = text.replace(',', '');
-    // Try to convert the string to a number.
-    const maybeNumber: number = _.toNumber(text);
+  matcher: numberMatcher,
+  baseMatcher: numberBaseMatcher
+};
 
-    // _.toNumber returns NaN if not a number.
-    return isNaN(maybeNumber) ? undefined : maybeNumber;
+/** A number in dollars. */
+export const CURRENCY: ISlotType = {
+  type: 'CURRENCY',
+  matcher: (text: string): number => {
+    if (text[0] === '$') {
+      text = text.slice(1);
+    }
+
+    return numberMatcher(text);
   },
-  // Only try to match a single run of numbers and valid formatters.
-  baseMatcher: '[\\d\\.,]+'
+  baseMatcher: '\\$?' + numberBaseMatcher
 };
 
 export const DATE: ISlotType = {

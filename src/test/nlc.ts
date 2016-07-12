@@ -123,7 +123,7 @@ describe('NLC', () => {
       });
 
       it('should match a number with commas', (done) => {
-        utils.expectCommandToMatch(`it's over 9,000!!!`, done);
+        utils.expectCommandToMatch(`it's over 9,000,000!!!`, done);
       });
       
       it('should match a number with decimals', (done) => {
@@ -138,12 +138,47 @@ describe('NLC', () => {
         utils.expectCommandNotToMatch(`it's over john`, done);
       });
       
+      it('should match a number with too many decimals', (done) => {
+        utils.expectCommandNotToMatch(`it's over 9,000.01.01!!!`, done);
+      });
+
       it('should return a number, not a string', (done) => {
         utils.expectCommandToMatchWith(
           `it's over 9,000.01!!!`,
           [ 9000.01 ],
           done
         );
+      });
+    });
+
+    describe('CURRENCY', () => {
+      beforeEach(() => {
+        // Register an intent with a CURRENCY.
+        nlc.registerIntent({
+          intent: 'CURRENCY_TEST',
+          callback: utils.matchCallback,
+          slots: [
+            {
+              name: 'Currency',
+              type: 'CURRENCY'
+            }
+          ],
+          utterances: [
+            `that'll be {Currency}`
+          ]
+        });
+      });
+
+      it('should match a currency amount', (done) => {
+        utils.expectCommandToMatch(`that'll be $1`, done);
+      });
+
+      it('should match a complicated currency amount', (done) => {
+        utils.expectCommandToMatch(`that'll be $1,000,000.01`, done);
+      });
+
+      it('should match a number', (done) => {
+        utils.expectCommandToMatch(`that'll be 1`, done);
       });
     });
 

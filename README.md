@@ -539,8 +539,16 @@ from passing in a gig of data and slowing down your server.
 Since NLC doesn't know how you're going to be using it (maybe you want users to be able to tell
 your bot long stories, who knows), it doesn't handle sanitization for you.
 
+Known Bugs
+----------
+- Can't use curly braces in a Slot Type baseMatcher. 
+
 Change Log
 ----------
+[0.1.4]
+- Fixed bug with multiple commas in a NUMBER Slot Type.
+- Added the CURRENCY Slot Type.
+
 [0.1.3]
 - Fixed bug with nested questions.
 
