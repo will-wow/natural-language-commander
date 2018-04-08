@@ -1,7 +1,8 @@
 {
   "name": "natural-language-commander",
   "version": "0.1.4",
-  "description": "A tool for connecting natural language commands with callbacks.",
+  "description":
+    "A tool for connecting natural language commands with callbacks.",
   "homepage": "https://github.com/whenther/natural-language-commander",
   "bugs": "https://github.com/whenther/natural-language-commander/issues",
   "repository": {
@@ -11,10 +12,14 @@
   "main": "dist/nlc.js",
   "scripts": {
     "test": "mocha --opts ./mocha.opts",
-    "build": "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
+    "build":
+      "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
     "prebuild": "rimraf dist && mkdirp dist && typings install",
     "postbuild": "rimraf dist/test",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "format": "yarn format-tslint && yarn format-prettier",
+    "format-tslint": "tslint -p . --config tslint.json",
+    "format-prettier": "prettier --write \"**/*.{ts,json}\""
   },
   "keywords": [
     "natural language processing",
@@ -23,7 +28,8 @@
     "bots",
     "hubot"
   ],
-  "author": "Will Lee-Wagner <will@whentheresawill.net> (http://whentheresawill.net)",
+  "author":
+    "Will Ockelmann-Wagner <will.ockelmann.wagner@gmail.com> (https://will-wow.surge.sh)",
   "license": "MIT",
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.9.0",
@@ -38,10 +44,14 @@
     "rimraf": "^2.5.2",
     "ts-node": "^0.7.3",
     "tsify": "^0.16.0",
-    "typescript": "^1.9.0-dev.20160531-1.0",
+    "typescript": "^2.8.1",
     "typings": "^1.0.4",
     "uglify-js": "^2.6.2",
-    "uglifyify": "^3.0.1"
+    "uglifyify": "^3.0.1",
+    "prettier": "^1.11.1",
+    "tslint": "^5.9.1",
+    "tslint-config-airbnb": "^5.8.0",
+    "tslint-config-prettier": "^1.10.0"
   },
   "dependencies": {
     "babel-runtime": "^6.9.2",

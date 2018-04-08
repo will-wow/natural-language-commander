@@ -36,7 +36,9 @@ export interface IIntent {
    */
   utterances: string[];
   /** The callback to run when the intent matches. */
-  callback: ((...slotValues: any[]) => void) | ((data: any, ...slotValues: any[]) => void);
+  callback:
+    | ((...slotValues: any[]) => void)
+    | ((data: any, ...slotValues: any[]) => void);
 }
 
 export interface IQuestion {
@@ -46,7 +48,7 @@ export interface IQuestion {
   slotType: string;
   /**
    * Array of utterances to match. Slots must be named {Slot}.
-   * Defaults to checking for just the slot. 
+   * Defaults to checking for just the slot.
    */
   utterances?: string[];
   /**

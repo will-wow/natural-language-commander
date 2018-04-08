@@ -1,11 +1,17 @@
-import _ = require('lodash');
+import _ = require("lodash");
 
-import Deferred from './lib/Deferred';
-import * as standardSlots from './lib/standardSlots';
-import {ISlotType, IHandleCommandOptions, IAskOptions, IIntent, IQuestion} from './lib/nlcInterfaces';
-import Matcher from './lib/Matcher';
-import Question from './lib/Question';
-import {ANONYMOUS} from './lib/constants';
+import Deferred from "./lib/Deferred";
+import * as standardSlots from "./lib/standardSlots";
+import {
+  ISlotType,
+  IHandleCommandOptions,
+  IAskOptions,
+  IIntent,
+  IQuestion
+} from "./lib/nlcInterfaces";
+import Matcher from "./lib/Matcher";
+import Question from "./lib/Question";
+import { ANONYMOUS } from "./lib/constants";
 
 interface IDelay {
   (callback: () => void): number;
@@ -13,7 +19,8 @@ interface IDelay {
 
 // Use setImmediate in node and FF, or the slower setTimeout otherwise,
 // to delay a resolve so it is always async.
-const delay: IDelay = typeof setImmediate === 'function' ? setImmediate : setTimeout;
+const delay: IDelay =
+  typeof setImmediate === "function" ? setImmediate : setTimeout;
 
 /** Holds registered natural language commands. */
 class NaturalLanguageCommander {
@@ -60,7 +67,9 @@ class NaturalLanguageCommander {
     if (_.isString(matcher)) {
       slotType.matcher = matcher.toLowerCase();
     } else if (_.isArray(matcher)) {
-      slotType.matcher = _.map(matcher, (option: string): string => option.toLowerCase());
+      slotType.matcher = _.map(matcher, (option: string): string =>
+        option.toLowerCase()
+      );
     }
 
     // Save the new type.
@@ -139,7 +148,10 @@ class NaturalLanguageCommander {
    */
   public addUtterance(intentName: string, utterance: string): boolean {
     // Get the intent by name.
-    const intent: IIntent = _.find(this.intents, (intent: IIntent): boolean => intent.intent === intentName);
+    const intent: IIntent = _.find(
+      this.intents,
+      (intent: IIntent): boolean => intent.intent === intentName
+    );
 
     // If not found, return.
     if (!intent) {
@@ -169,7 +181,10 @@ class NaturalLanguageCommander {
   public handleCommand(data: any, command: string): Promise<string>;
   public handleCommand(command: string): Promise<string>;
   public handleCommand(options: IHandleCommandOptions): Promise<string>;
-  public handleCommand(dataOrCommandOrOptions: (IHandleCommandOptions | string | any), command?: string): Promise<string> {
+  public handleCommand(
+    dataOrCommandOrOptions: IHandleCommandOptions | string | any,
+    command?: string
+  ): Promise<string> {
     const deferred = new Deferred();
 
     // Handle overload.
@@ -228,7 +243,7 @@ class NaturalLanguageCommander {
    * @param options.data - arbitrary data to pass along.
    * @param options.userId - any unqiue identifier for a user.
    * @param options.question - An intent name from a question intent.
-   * @returns false if questionName not found, true otherwise. 
+   * @returns false if questionName not found, true otherwise.
    */
   public ask(options: IAskOptions): Promise<boolean>;
   public ask(question: string): Promise<boolean>;
@@ -278,12 +293,14 @@ class NaturalLanguageCommander {
    * @param command - the user's command.
    */
   private cleanCommand(command: string): string {
-    return command
-      // Replace smart single quotes.
-      .replace(/[\u2018\u2019]/g, "'")
-      // Replace smart double quotes.
-      .replace(/[\u201C\u201D]/g, '"')
-      .trim();
+    return (
+      command
+        // Replace smart single quotes.
+        .replace(/[\u2018\u2019]/g, "'")
+        // Replace smart double quotes.
+        .replace(/[\u201C\u201D]/g, '"')
+        .trim()
+    );
   }
 
   private doesIntentExist(intentName: string): boolean {
@@ -299,7 +316,7 @@ class NaturalLanguageCommander {
   }
 
   /**
-   * Set the active question for a user. 
+   * Set the active question for a user.
    */
   private setActiveQuestion(userId: string, question: Question): void {
     this.activeQuestions[userId || ANONYMOUS] = question;
@@ -313,7 +330,12 @@ class NaturalLanguageCommander {
   }
 
   /** Handle a command for an active question. */
-  private handleQuestionAnswer(deferred: Deferred, data: any, command: string, userId: string): void {
+  private handleQuestionAnswer(
+    deferred: Deferred,
+    data: any,
+    command: string,
+    userId: string
+  ): void {
     // If this user has an active question, grab it.
     const question: Question = this.getActiveQuestion(userId);
     const questionName: string = question.name;
@@ -323,7 +345,8 @@ class NaturalLanguageCommander {
     this.finishQuestion(userId);
 
     // Try to answer the question with the command.
-    question.answer(command, data || userId)
+    question
+      .answer(command, data || userId)
       .then(() => {
         // If the answer matched, resolve with the question name.
         deferred.resolve(questionName);
@@ -340,7 +363,7 @@ class NaturalLanguageCommander {
   private handleNormalCommand(data: any, command: string): string {
     /** Flag if there was a match */
     let foundMatchName: string;
-    
+
     // Handle a normal command.
     _.forEach(this.matchers, (matcher: Matcher) => {
       /** The slots from the match or [], if the match was found. */

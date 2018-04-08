@@ -1,14 +1,20 @@
-import _ = require('lodash');
+import _ = require("lodash");
 
-import commonMistakes from './commonMistakes';
-import {SlotTypeFunction, SlotTypeItem, ISlotType, IIntentSlot, IIntent} from './nlcInterfaces';
+import commonMistakes from "./commonMistakes";
+import {
+  SlotTypeFunction,
+  SlotTypeItem,
+  ISlotType,
+  IIntentSlot,
+  IIntent
+} from "./nlcInterfaces";
 
 /**
  * A mapping of local slot names to slot values.
  */
 type ISlotMapping = {
   [slotName: string]: any;
-}
+};
 
 /**
  * Matches a utterance and slots against a command.
@@ -38,7 +44,7 @@ class Matcher {
       // A lazy regexp that looks for words in curly braces.
       // Don't use global, so it checks the new utterance fresh every time.
       const slotRegexp: RegExp = /{(\w+?)}/;
-      const names: string[] = _.map<IIntentSlot, string>(slots, 'name');
+      const names: string[] = _.map<IIntentSlot, string>(slots, "name");
       let matchIndex: number;
 
       // Loop while there are still slots left.
@@ -56,7 +62,7 @@ class Matcher {
           const slot: IIntentSlot = slots[slotIndex];
           // Find the matching slot type.
           const slotType: ISlotType = this.slotTypes[slot.type];
-          
+
           // Handle bad slot type.
           if (!slotType) {
             throw new Error(`NLC: slot type ${slot.type} does not exist!`);
@@ -74,7 +80,11 @@ class Matcher {
         } else {
           // Throw an error so the user knows they used a bad slot.
           // TODO: Handle intentional slot-looking charater runs with escaping or something?
-          throw new Error(`NLC: slot "${slotName}" not included in slots ${JSON.stringify(names)} for ${intent.intent}!`);
+          throw new Error(
+            `NLC: slot "${slotName}" not included in slots ${JSON.stringify(
+              names
+            )} for ${intent.intent}!`
+          );
         }
       }
     }
@@ -83,13 +93,13 @@ class Matcher {
     utterance = this.replaceCommonMispellings(utterance);
     utterance = this.replaceSpacesForRegexp(utterance);
     utterance = this.replaceBracesForRegexp(utterance);
-    
+
     // Add the start carat, so this only matches the start of commands,
     // which helps with collisions.
-    utterance = '^\\s*' + utterance;
+    utterance = "^\\s*" + utterance;
 
     // Compile the regular expression, ignore case.
-    this.regExp = new RegExp(utterance, 'i');
+    this.regExp = new RegExp(utterance, "i");
     // Store the mapping for later retrieval.
     this.slotMapping = slotMapping;
   }
@@ -129,7 +139,7 @@ class Matcher {
 
       // If the slot didn't match, note the bad match, and exit early.
       // Allow the value 0 to match.
-      if (slotData === undefined || slotData === '') {
+      if (slotData === undefined || slotData === "") {
         badMatch = true;
         return false;
       }
@@ -155,33 +165,39 @@ class Matcher {
    */
   private replaceCommonMispellings(utterance: string): string {
     // Split utterance into words, removing duplicates.
-    const words = _.chain(utterance).words().uniq().value();
-    
-    _.forEach(words, (word) => {
+    const words = _.chain(utterance)
+      .words()
+      .uniq()
+      .value();
+
+    _.forEach(words, word => {
       // Get the mistake checker, if there is one.
       const mistakeReplacement = commonMistakes(word);
-      
+
       if (mistakeReplacement) {
         // Replace all instances of the word with the replacement, if there is one.
-        utterance = utterance.replace(new RegExp(word, 'ig'), mistakeReplacement);
+        utterance = utterance.replace(
+          new RegExp(word, "ig"),
+          mistakeReplacement
+        );
       }
     });
-    
+
     return utterance;
   }
 
   /** Replace runs of spaces with the space character, for better matching. */
   private replaceSpacesForRegexp(utterance: string): string {
-    return _.replace(utterance, /\s+/g, '\\s+');
+    return _.replace(utterance, /\s+/g, "\\s+");
   }
 
   /** Escape braces that would cause a problem with regular expressions. */
   private replaceBracesForRegexp(utterance: string): string {
     utterance
-    .replace('[', '\\[')
-    .replace(']', '\\]')
-    .replace('(', '\\(')
-    .replace(')', '\\)');
+      .replace("[", "\\[")
+      .replace("]", "\\]")
+      .replace("(", "\\(")
+      .replace(")", "\\)");
 
     return utterance;
   }
@@ -189,13 +205,20 @@ class Matcher {
   /**
    * Replace a solt with a regex capture group.
    */
-  private repaceSlotWithCaptureGroup(utterance: string, slotType: ISlotType, matchIndex: number, matchLength: number): string {
+  private repaceSlotWithCaptureGroup(
+    utterance: string,
+    slotType: ISlotType,
+    matchIndex: number,
+    matchLength: number
+  ): string {
     // Find the end of the slot name (accounting for braces).
     const lastIndex: number = matchIndex + matchLength;
-    const matcher = slotType.baseMatcher || '.+';
+    const matcher = slotType.baseMatcher || ".+";
 
     // Replace the slot with a generic capture group.
-    return `${utterance.slice(0, matchIndex)}(${matcher})${utterance.slice(lastIndex)}`;
+    return `${utterance.slice(0, matchIndex)}(${matcher})${utterance.slice(
+      lastIndex
+    )}`;
   }
 
   // ==============================
@@ -219,13 +242,14 @@ class Matcher {
     // Match the slot based on the type.
     if (_.isRegExp(slotOptions)) {
       return this.getRegexpSlot(slotText, slotOptions);
-    } else if (_.isString(slotOptions)) {
-      return this.getStringSlot(slotText, slotOptions);
-    } else if (_.isArray(slotOptions)) {
-      return this.getListSlotType(slotText, slotOptions);
-    } else {
-      return this.getFunctionSlotType(slotText, slotOptions);
     }
+    if (_.isString(slotOptions)) {
+      return this.getStringSlot(slotText, slotOptions);
+    }
+    if (_.isArray(slotOptions)) {
+      return this.getListSlotType(slotText, slotOptions);
+    }
+    return this.getFunctionSlotType(slotText, slotOptions);
   }
 
   /**
@@ -243,13 +267,16 @@ class Matcher {
   private getStringSlot(slotText: string, slotType: string): string {
     if (slotText.toLowerCase() === slotType) {
       return slotText;
-    } 
+    }
   }
 
   /**
    * Check if the string matches the slotType function, and return the function's return value if it does.
    */
-  private getFunctionSlotType(slotText: string, slotType: SlotTypeFunction): string {
+  private getFunctionSlotType(
+    slotText: string,
+    slotType: SlotTypeFunction
+  ): string {
     return slotType(slotText);
   }
 
