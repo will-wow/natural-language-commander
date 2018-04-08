@@ -43,6 +43,41 @@ describe("NLC", () => {
     });
   });
 
+  describe("deregistering", () => {
+    describe("deregisterIntent", () => {
+      describe("given some intents", () => {
+        beforeEach(() => {
+          nlc.registerIntent({
+            intent: "REMOVE_ME",
+            callback: utils.matchCallback,
+            utterances: ["I shouldn't match"]
+          });
+          nlc.registerIntent({
+            intent: "TEST",
+            callback: utils.matchCallback,
+            utterances: ["test"]
+          });
+
+          nlc.addUtterance("REMOVE_ME", "I also shouldn't match");
+
+          nlc.deregisterIntent("REMOVE_ME");
+        });
+
+        it("won't match after a deregister", (done) => {
+          utils.expectCommandNotToMatch("I shouldn't match", done);
+        });
+
+        it("won't match added utterances after a deregister", (done) => {
+          utils.expectCommandNotToMatch("I also shouldn't match", done);
+        });
+
+        it("doesn't effect other intents", (done) => {
+          utils.expectCommandToMatch("test", done);
+        });
+      });
+    });
+  });
+
   describe("slot types", () => {
     describe("STRING", () => {
       beforeEach(() => {

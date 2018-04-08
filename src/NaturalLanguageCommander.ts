@@ -96,6 +96,33 @@ class NaturalLanguageCommander {
     _.forEach(intent.utterances, (utterance: string): void => {
       this.matchers.push(new Matcher(this.slotTypes, intent, utterance));
     });
+
+    return true;
+  };
+
+  /**
+   * De-register an intent. Bound to this.
+   * @param intentName
+   * @returns true if removed, false if the intent doesn't exist.
+   */
+  public deregisterIntent = (intentName: string): boolean => {
+    if (!this.doesIntentExist(intentName)) {
+      return false;
+    }
+
+    // Remove the name from the name list.
+    this.intentNames = _.reject(this.intentNames, name => name === intentName);
+
+    // Remove the intent.
+    this.intents = _.reject(this.intents, { intent: intentName });
+
+    // Remove matchers for the intent.
+    this.matchers = _.reject(
+      this.matchers,
+      matcher => matcher.intent.intent === intentName
+    );
+
+    return true;
   };
 
   /**
