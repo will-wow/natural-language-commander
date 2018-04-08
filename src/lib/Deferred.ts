@@ -5,8 +5,8 @@ class Deferred {
   public reject: Function;
   public promise: deferredPromise;
 
-  constructor () {
-    this.promise = new Promise ((resolve: Function, reject: Function) => {
+  constructor() {
+    this.promise = new Promise((resolve: Function, reject: Function) => {
       this.resolve = resolve;
       this.reject = reject;
     });

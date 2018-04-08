@@ -1,1 +1,1 @@
-export const ANONYMOUS: string = 'anonymous';
+export const ANONYMOUS: string = "anonymous";

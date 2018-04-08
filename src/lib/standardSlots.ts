@@ -3,58 +3,51 @@
  * @module standardSlots
  */
 
-import _ = require('lodash');
-import moment = require('moment-timezone');
+import _ = require("lodash");
+import moment = require("moment-timezone");
 
-import {ISlotType} from './nlcInterfaces';
+import { ISlotType } from "./nlcInterfaces";
 
 // TODO: Make this configurable.
 /** The timezone to use for relative dates. */
-const TIMEZONE = 'America/Los_Angeles';
+const TIMEZONE = "America/Los_Angeles";
 
 const DATE_FORMATS = [
-  'M/D/YYYY',
-  'M-D-YYYY',
-  'MMM D YYYY',
-  'MMM D, YYYY',
-  'MMMM D YYYY',
-  'MMMM D, YYYY',
-  'YYYY-M-D'
+  "M/D/YYYY",
+  "M-D-YYYY",
+  "MMM D YYYY",
+  "MMM D, YYYY",
+  "MMMM D YYYY",
+  "MMMM D, YYYY",
+  "YYYY-M-D"
 ];
 
 /** Commands to cancel a question. */
 export const NEVERMIND: ISlotType = {
-  type: 'NEVERMIND',
-  matcher: [
-    'nevermind',
-    'never mind',
-    'cancel',
-    'exit',
-    'back',
-    'quit'
-  ]
+  type: "NEVERMIND",
+  matcher: ["nevermind", "never mind", "cancel", "exit", "back", "quit"]
 };
 
 /** A string of any length. */
 export const STRING: ISlotType = {
-  type: 'STRING',
+  type: "STRING",
   // Everything comes in as a string.
   matcher: _.identity
 };
 
 /** A string with only one word. */
 export const WORD: ISlotType = {
-  type: 'WORD',
+  type: "WORD",
   matcher: _.identity,
-  baseMatcher: '\\w+'
+  baseMatcher: "\\w+"
 };
 
 // Only tries to match a single run of numbers and valid formatters.
-const numberBaseMatcher = '[\\d,]+(?:\\.[\\d,]+)?';
+const numberBaseMatcher = "[\\d,]+(?:\\.[\\d,]+)?";
 
 function numberMatcher(text: string): number {
   // Strip formatting commas.
-  text = text.replace(/,/g, '');
+  text = text.replace(/,/g, "");
   // Try to convert the string to a number.
   const maybeNumber: number = _.toNumber(text);
 
@@ -64,36 +57,46 @@ function numberMatcher(text: string): number {
 
 /** A number */
 export const NUMBER: ISlotType = {
-  type: 'NUMBER',
+  type: "NUMBER",
   matcher: numberMatcher,
   baseMatcher: numberBaseMatcher
 };
 
 /** A number in dollars. */
 export const CURRENCY: ISlotType = {
-  type: 'CURRENCY',
+  type: "CURRENCY",
   matcher: (text: string): number => {
-    if (text[0] === '$') {
+    if (text[0] === "$") {
       text = text.slice(1);
     }
 
     return numberMatcher(text);
   },
-  baseMatcher: '\\$?' + numberBaseMatcher
+  baseMatcher: "\\$?" + numberBaseMatcher
 };
 
 export const DATE: ISlotType = {
-  type: 'DATE',
+  type: "DATE",
   matcher: (dateString: string): moment.Moment => {
     /*
      * Realitive dates.
      */
-    if (dateString === 'today') {
-      return moment().tz(TIMEZONE).startOf('day');
-    } else if (dateString === 'tomorrow') {
-      return moment().tz(TIMEZONE).startOf('day').add(1, 'day');
-    } else if (dateString === 'yesterday') {
-      return moment().tz(TIMEZONE).startOf('day').subtract(1, 'day');
+    if (dateString === "today") {
+      return moment()
+        .tz(TIMEZONE)
+        .startOf("day");
+    }
+    if (dateString === "tomorrow") {
+      return moment()
+        .tz(TIMEZONE)
+        .startOf("day")
+        .add(1, "day");
+    }
+    if (dateString === "yesterday") {
+      return moment()
+        .tz(TIMEZONE)
+        .startOf("day")
+        .subtract(1, "day");
     }
 
     /*
@@ -109,15 +112,15 @@ export const DATE: ISlotType = {
 };
 
 export const SLACK_NAME: ISlotType = {
-  type: 'SLACK_NAME',
+  type: "SLACK_NAME",
   // Names start with @.
   matcher: /^@\w+/i,
-  baseMatcher: '@\\w+'
+  baseMatcher: "@\\w+"
 };
 
 export const SLACK_ROOM: ISlotType = {
-  type: 'SLACK_ROOM',
+  type: "SLACK_ROOM",
   // Rooms start with #, but names work too.
   matcher: /^[#@]\w+/i,
-  baseMatcher: '[#@]\\w+'
+  baseMatcher: "[#@]\\w+"
 };

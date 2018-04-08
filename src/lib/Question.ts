@@ -1,13 +1,13 @@
-import _ = require('lodash');
+import _ = require("lodash");
 
-import NaturalLanguageCommander = require('../NaturalLanguageCommander');
-import {IIntent, IQuestion} from './nlcInterfaces';
+import NaturalLanguageCommander = require("../NaturalLanguageCommander");
+import { IIntent, IQuestion } from "./nlcInterfaces";
 
 /** Represents a registered question. */
 class Question {
   public name: string;
   private nlc: NaturalLanguageCommander;
-  private JUST_THE_SLOT_UTTERANCE: string[] = [ '{Slot}' ];
+  private JUST_THE_SLOT_UTTERANCE: string[] = ["{Slot}"];
 
   constructor(
     parentNlc: NaturalLanguageCommander,
@@ -54,31 +54,33 @@ class Question {
 
   /** A standard intent pulled from the question intent. */
   private get questionIntent(): IIntent {
-    const utterances = this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
+    const utterances =
+      this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
 
     return {
+      utterances,
       intent: this.name,
       slots: [
         {
-          name: 'Slot',
+          name: "Slot",
           type: this.questionData.slotType
         }
       ],
-      utterances,
       callback: this.questionData.successCallback
     };
   }
 
   /** An intent for cancelling the question. */
   private get cancelIntent(): IIntent {
-    const utterances = this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
+    const utterances =
+      this.questionData.utterances || this.JUST_THE_SLOT_UTTERANCE;
 
     return {
-      intent: 'CANCEL',
+      intent: "CANCEL",
       slots: [
         {
-          name: 'Slot',
-          type: 'NEVERMIND'
+          name: "Slot",
+          type: "NEVERMIND"
         }
       ],
       utterances: this.JUST_THE_SLOT_UTTERANCE,
