@@ -77,6 +77,28 @@ class NaturalLanguageCommander {
   };
 
   /**
+   * Remove a custom slot type by name. Throws an error if any existing intents
+   * rely on the slot type.
+   * @param slotTypeName
+   */
+  public removeSlotType = (slotTypeName: string): void => {
+    const intentUsingSlotType = _.find(this.intents, intent => {
+      const slotTypes = _.map(intent.slots || [], slot => slot.type);
+      return _.includes(slotTypes, slotTypeName);
+    });
+
+    if (intentUsingSlotType) {
+      throw new Error(
+        `NLC: You can't remove the ${slotTypeName} Slot Type while the ${
+          intentUsingSlotType.intent
+        } intent relies on it.`
+      );
+    }
+
+    delete this.slotTypes[slotTypeName];
+  };
+
+  /**
    * Register an intent. Bound to this.
    * @param intent
    * @returns true if added, false if the intent name already exists.
@@ -144,6 +166,28 @@ class NaturalLanguageCommander {
   };
 
   /**
+   * De-register a question. Bound to this.
+   * @param questionName
+   * @returns true if removed, false if the question doesn't exist.
+   */
+  public deregisterQuestion = (questionName: string): boolean => {
+    if (!this.doesIntentExist(questionName)) {
+      return false;
+    }
+
+    // Remove from the namelist.
+    this.intentNames = _.reject(
+      this.intentNames,
+      name => name === questionName
+    );
+
+    // Remove from the questions dictionary.
+    delete this.questions[questionName];
+
+    return true;
+  };
+
+  /**
    * Register a callback to be called when a command doesn't match.
    * Isn't called when an answer command doesn't match, since that is handled
    * elsewhere.
@@ -194,6 +238,44 @@ class NaturalLanguageCommander {
     intent.utterances.push(utterance);
     // Add the utterance to the matchers list.
     this.matchers.push(new Matcher(this.slotTypes, intent, utterance));
+    return true;
+  }
+
+  /**
+   * Remove an utterance from an existing intent.
+   * @param intentName - The name of the intent to add to.
+   * @param utterance - The utterance string to add.
+   * @returns False if the intent was not found or the utterance does not exist. Otherwise true.
+   */
+  public removeUtterance(intentName: string, utterance: string): boolean {
+    // Get the intent by name.
+    const intent: IIntent = _.find(
+      this.intents,
+      (intent: IIntent): boolean => intent.intent === intentName
+    );
+
+    // If not found, return.
+    if (!intent) {
+      return false;
+    }
+
+    // If the utterance does not exist, return false.
+    if (!_.includes(intent.utterances, utterance)) {
+      return false;
+    }
+
+    // Remove the utterance from the intent.
+    intent.utterances = _.reject(
+      intent.utterances,
+      intentUtterance => intentUtterance === utterance
+    );
+
+    // Remove matchers for the intent.
+    this.matchers = _.reject(
+      this.matchers,
+      matcher => matcher.originalUtterance === utterance
+    );
+
     return true;
   }
 
