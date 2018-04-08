@@ -44,7 +44,7 @@ class Matcher {
       // A lazy regexp that looks for words in curly braces.
       // Don't use global, so it checks the new utterance fresh every time.
       const slotRegexp: RegExp = /{(\w+?)}/;
-      const names: string[] = _.map<IIntentSlot, string>(slots, "name");
+      const names: string[] = _.map(slots, "name");
       let matchIndex: number;
 
       // Loop while there are still slots left.
