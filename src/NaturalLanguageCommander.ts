@@ -163,6 +163,8 @@ class NaturalLanguageCommander {
 
     // Set up the question.
     this.questions[questionData.name] = new Question(this, questionData);
+
+    return true;
   };
 
   /**
