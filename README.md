@@ -219,6 +219,14 @@ nlc.addSlotType({
 });
 ```
 
+To remove a SlotType, you can call:
+
+```javascript
+nlc.removeSlotType("SLOT_TYPE"):
+```
+
+however, you can only do this if no intents rely on the slot type.
+
 ## Registering Intents
 
 To register an intent, call `nlc.registerIntent` with an Intent object with the attributes:
@@ -289,7 +297,23 @@ nlc.registerIntent({
 ```
 
 You can also add an utterance to an existing intent (if you're generating them from some learning
-algorithm or something) by calling `nlc.addUtterance('INTENT_NAME', 'New utterance');`
+algorithm or something) by calling:
+
+```javascript
+nlc.addUtterance('INTENT_NAME', 'New utterance');`
+```
+
+or remove one by calling:
+
+```javascript
+nlc.removeUtterance('INTENT_NAME', 'New utterance');`
+```
+
+You can remove an entire intent by calling:
+
+```javascript
+nlc.deregisterIntent('INTENT_NAME')`
+```
 
 ## Handling Commands
 
@@ -372,6 +396,12 @@ nlc.handleCommand({
   userId: "12345",
   command: `I'd wrestle a bear.`
 });
+```
+
+To de-register a question, call:
+
+```javascript
+nlc.deregisterQuestion('QUESTION_NAME');
 ```
 
 ## Handling commands that don't match

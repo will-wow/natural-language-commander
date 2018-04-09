@@ -43,6 +43,94 @@ describe("NLC", () => {
     });
   });
 
+  describe("deregistering", () => {
+    describe("given some intents", () => {
+      beforeEach(() => {
+        nlc.registerIntent({
+          intent: "REMOVE_ME",
+          callback: utils.matchCallback,
+          utterances: ["I shouldn't match"]
+        });
+        nlc.registerIntent({
+          intent: "TEST",
+          callback: utils.matchCallback,
+          utterances: ["test"]
+        });
+
+        nlc.addUtterance("REMOVE_ME", "I also shouldn't match");
+      });
+
+      describe("deregisterIntent", () => {
+        beforeEach(() => {
+          nlc.deregisterIntent("REMOVE_ME");
+        });
+        it("won't match after a deregister", done => {
+          utils.expectCommandNotToMatch("I shouldn't match", done);
+        });
+
+        it("won't match added utterances after a deregister", done => {
+          utils.expectCommandNotToMatch("I also shouldn't match", done);
+        });
+
+        it("doesn't effect other intents", done => {
+          utils.expectCommandToMatch("test", done);
+        });
+      });
+
+      describe("removeUtterance", () => {
+        beforeEach(() => {
+          nlc.removeUtterance("REMOVE_ME", "I shouldn't match");
+        });
+        it("removes an utterance", done => {
+          utils.expectCommandNotToMatch("I shouldn't match", done);
+        });
+
+        it("doesn't remove other utterances", done => {
+          utils.expectCommandToMatch("I also shouldn't match", done);
+        });
+      });
+
+      describe("removeSlotType", () => {
+        beforeEach(() => {
+          nlc.addSlotType({
+            type: "STRING_TYPE",
+            matcher: "TEST"
+          });
+        });
+
+        describe("without any matching intents", () => {
+          it("should work", () => {
+            expect(() => {
+              nlc.removeSlotType("STRING_TYPE");
+            }).not.to.throw();
+          });
+        });
+
+        describe("with a matching intent", () => {
+          beforeEach(() => {
+            nlc.registerIntent({
+              intent: "STRING_TEST",
+              callback: utils.matchCallback,
+              slots: [
+                {
+                  name: "String",
+                  type: "STRING_TYPE"
+                }
+              ],
+              utterances: ["test {String} test"]
+            });
+          });
+
+          it("should throw an error", () => {
+            expect(() => {
+              nlc.removeSlotType("STRING_TYPE");
+            }).to.throw("NLC: You can't remove the STRING_TYPE Slot Type while the STRING_TEST intent relies on it.");
+          });
+        });
+      });
+    });
+  });
+
   describe("slot types", () => {
     describe("STRING", () => {
       beforeEach(() => {
@@ -277,28 +365,32 @@ describe("NLC", () => {
 
     describe("custom", () => {
       describe("duplicates", () => {
-        it("should throw errors", done => {
-          let error;
-
+        beforeEach(() => {
           nlc.addSlotType({
             type: "STRING_TYPE",
             matcher: "TEST"
           });
+        });
 
+        it("should throw errors", () => {
           // Duplicate the type (this should throw an error),
-          try {
+          expect(() => {
             nlc.addSlotType({
               type: "STRING_TYPE",
               matcher: "ANOTHER_TEST"
             });
-          } catch (e) {
-            // Save the error message.
-            error = e;
-          }
+          }).to.throw();
+        });
 
-          // There should have been an error message.
-          expect(error).to.exist;
-          done();
+        it("should work if the slot type has been removed", () => {
+          nlc.removeSlotType("STRING_TYPE");
+
+          expect(() => {
+            nlc.addSlotType({
+              type: "STRING_TYPE",
+              matcher: "ANOTHER_TEST"
+            });
+          }).not.to.throw();
         });
       });
 
@@ -611,6 +703,15 @@ describe("NLC", () => {
 
     it("should reject from ask when the question name does not exist", done => {
       nlc.ask("BAD").catch((status: boolean) => {
+        expect(status).to.be.false;
+        done();
+      });
+    });
+
+    it("should reject from ask when the question name has been deregistered", done => {
+      nlc.deregisterQuestion("QUESTION");
+
+      nlc.ask("QUESTION").catch((status: boolean) => {
         expect(status).to.be.false;
         done();
       });

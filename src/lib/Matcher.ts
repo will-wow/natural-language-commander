@@ -20,6 +20,8 @@ type ISlotMapping = {
  * Matches a utterance and slots against a command.
  */
 class Matcher {
+  /** The utterance used to set up the Matcher, for finding to remove. */
+  public originalUtterance: string;
   /** The regexp used to match against a command. */
   private regExp: RegExp;
   /** Map of the intent's slot names to slot types. */
@@ -36,6 +38,8 @@ class Matcher {
     public intent: IIntent,
     utterance: string
   ) {
+    this.originalUtterance = utterance;
+
     const slots: IIntentSlot[] = this.intent.slots;
     const slotMapping: IIntentSlot[] = [];
 
