@@ -124,7 +124,9 @@ describe("NLC", () => {
           it("should throw an error", () => {
             expect(() => {
               nlc.removeSlotType("STRING_TYPE");
-            }).to.throw("NLC: You can't remove the STRING_TYPE Slot Type while the STRING_TEST intent relies on it.");
+            }).to.throw(
+              "NLC: You can't remove the STRING_TYPE Slot Type while the STRING_TEST intent relies on it."
+            );
           });
         });
       });
