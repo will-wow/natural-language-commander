@@ -1,6 +1,6 @@
 {
   "name": "natural-language-commander",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description":
     "A tool for connecting natural language commands with callbacks.",
   "homepage": "https://github.com/will-wow/natural-language-commander",

@@ -401,7 +401,7 @@ nlc.handleCommand({
 To de-register a question, call:
 
 ```javascript
-nlc.deregisterQuestion('QUESTION_NAME');
+nlc.deregisterQuestion("QUESTION_NAME");
 ```
 
 ## Handling commands that don't match
@@ -582,6 +582,10 @@ your bot long stories, who knows), it doesn't handle sanitization for you.
 * Can't use curly braces in a Slot Type baseMatcher.
 
 ## Change Log
+
+[0.2.0]
+
+* Add deregister methods for Intents, Questions, SlotTypes, and Utterances
 
 [0.1.4]
 
