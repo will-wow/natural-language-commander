@@ -1,5 +1,5 @@
 {
-  "name": "natural-language-commander",
+  "name": "@voiceflow/natural-language-commander",
   "version": "0.2.0",
   "description":
     "A tool for connecting natural language commands with callbacks.",
