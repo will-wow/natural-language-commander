@@ -87,3 +87,13 @@ export interface IAskOptions {
   data?: any;
   userId?: string;
 }
+
+export interface ISlotFullfilment {
+  name: string;
+  value?: string;
+}
+
+export interface IIntentFullfilment {
+  intent: string;
+  slots: ISlotFullfilment[];
+}

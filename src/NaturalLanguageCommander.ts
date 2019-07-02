@@ -1,13 +1,14 @@
 import _ = require("lodash");
 
 import Deferred from "./lib/Deferred";
-import * as standardSlots from "./lib/standardSlots";
 import {
   ISlotType,
   IHandleCommandOptions,
   IAskOptions,
   IIntent,
-  IQuestion
+  IQuestion,
+  ISlotFullfilment,
+  IIntentFullfilment,
 } from "./lib/nlcInterfaces";
 import Matcher from "./lib/Matcher";
 import Question from "./lib/Question";
@@ -46,8 +47,6 @@ class NaturalLanguageCommander {
     // Noop the notFoundCallback.
     this.notFoundCallback = () => {};
 
-    // Add the standard slot types.
-    _.forOwn(standardSlots, this.addSlotType);
   }
 
   /**
@@ -323,12 +322,12 @@ class NaturalLanguageCommander {
 
     // Delay to ensure this is async.
     delay(() => {
-      const intentName: string = this.handleNormalCommand(data, command);
+      const commandResult: IIntentFullfilment = this.handleNormalCommand(data, command);
 
       // If the command was successful:
-      if (intentName) {
+      if (commandResult) {
         // Resolve with the intent name, for logging.
-        deferred.resolve(intentName);
+        deferred.resolve(commandResult);
         return;
       }
 
@@ -471,32 +470,39 @@ class NaturalLanguageCommander {
   }
 
   /** Handle a command normally. */
-  private handleNormalCommand(data: any, command: string): string {
+  private handleNormalCommand(data: any, command: string): IIntentFullfilment {
     /** Flag if there was a match */
-    let foundMatchName: string;
+    let foundMatch: IIntentFullfilment;
 
     // Handle a normal command.
     _.forEach(this.matchers, (matcher: Matcher) => {
       /** The slots from the match or [], if the match was found. */
-      const orderedSlots: any[] = matcher.check(command);
+      const orderedSlots: ISlotFullfilment[] = matcher.check(command);
 
       // If orderedSlots is undefined, the match failed.
       if (orderedSlots) {
+        foundMatch = {
+          intent: matcher.intent.intent,
+          slots: orderedSlots,
+        };
+        
+        const callSlots: any[] = orderedSlots.map(slot=>slot.value);
+
         if (data) {
           // Add the data as the first arg, if specified.
-          orderedSlots.unshift(data);
+          callSlots.unshift(data);
         }
 
         // Call the callback with the slot values in order.
-        matcher.intent.callback.apply(null, orderedSlots);
+        matcher.intent.callback.apply(null, callSlots);
         // Flag that a match was found.
-        foundMatchName = matcher.intent.intent;
+        
         // Exit early.
         return false;
       }
     });
 
-    return foundMatchName;
+    return foundMatch;
   }
 }
 

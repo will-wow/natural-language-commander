@@ -5,6 +5,8 @@ import chaiSpies = require("chai-spies");
 import NLC = require("../NaturalLanguageCommander");
 import Deferred from "../lib/Deferred";
 import TestUtils from "./TestUtils";
+import * as standardSlots from "../lib/standardSlots";
+
 
 chai.use(chaiSpies);
 const expect = chai.expect;
@@ -15,6 +17,8 @@ describe("NLC", () => {
 
   beforeEach(() => {
     nlc = new NLC();
+    _.forOwn(standardSlots, nlc.addSlotType.bind(nlc));
+
     utils = new TestUtils(nlc);
   });
 
@@ -785,9 +789,9 @@ describe("NLC", () => {
           userId: "2",
           command: "10"
         })
-        .then((intentName: string) => {
+        .then((intentName: any) => {
           expect(utils.matchCallback).to.have.been.called();
-          expect(intentName).to.equal("OTHER");
+          expect(intentName.intent).to.equal("OTHER");
           done();
         });
     });
@@ -804,9 +808,9 @@ describe("NLC", () => {
         callback: utils.matchCallback
       });
 
-      nlc.handleCommand("10").then((intentName: string) => {
+      nlc.handleCommand("10").then((intentName: any) => {
         expect(utils.matchCallback).to.have.been.called();
-        expect(intentName).to.equal("OTHER");
+        expect(intentName.intent).to.equal("OTHER");
         done();
       });
     });

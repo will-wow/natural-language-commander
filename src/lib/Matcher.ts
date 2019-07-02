@@ -6,7 +6,8 @@ import {
   SlotTypeItem,
   ISlotType,
   IIntentSlot,
-  IIntent
+  IIntent,
+  ISlotFullfilment,
 } from "./nlcInterfaces";
 
 /**
@@ -298,11 +299,14 @@ class Matcher {
    * @param slotMapping - The slot values mapped to their names.
    * @returns The ordered array of slot values.
    */
-  private getOrderedSlots(slotMapping: ISlotMapping): any[] {
+  private getOrderedSlots(slotMapping: ISlotMapping): ISlotFullfilment[] {
     // Loop through the intent's slot ordering.
-    return _.map(this.intent.slots, (slot: IIntentSlot): any => {
+    return _.map(this.intent.slots, (slot: IIntentSlot): ISlotFullfilment => {
       // Add the slot values in order.
-      return slotMapping[slot.name];
+      return {
+        name: slot.name,
+        value: slotMapping[slot.name],
+      };
     });
   }
 }

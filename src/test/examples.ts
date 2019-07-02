@@ -5,6 +5,8 @@ import chaiSpies = require("chai-spies");
 import NLC = require("../NaturalLanguageCommander");
 import Deferred from "../lib/Deferred";
 import TestUtils from "./TestUtils";
+import * as standardSlots from "../lib/standardSlots";
+
 
 chai.use(chaiSpies);
 const expect = chai.expect;
@@ -18,6 +20,8 @@ describe("README examples", () => {
 
   beforeEach(() => {
     nlc = new NLC();
+    _.forOwn(standardSlots, nlc.addSlotType.bind(nlc));
+
     utils = new TestUtils(nlc);
 
     chai.spy.on(console, "log");

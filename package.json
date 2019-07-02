@@ -1,8 +1,7 @@
 {
   "name": "@voiceflow/natural-language-commander",
   "version": "0.2.0",
-  "description":
-    "A tool for connecting natural language commands with callbacks.",
+  "description": "A tool for connecting natural language commands with callbacks.",
   "homepage": "https://github.com/will-wow/natural-language-commander",
   "bugs": "https://github.com/will-wow/natural-language-commander/issues",
   "repository": {
@@ -12,8 +11,7 @@
   "main": "dist/nlc.js",
   "scripts": {
     "test": "mocha --opts ./mocha.opts",
-    "build":
-      "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
+    "build": "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
     "prebuild": "rimraf dist && mkdirp dist",
     "postbuild": "rimraf dist/test",
     "prepublish": "npm run build",
@@ -28,8 +26,7 @@
     "bots",
     "hubot"
   ],
-  "author":
-    "Will Ockelmann-Wagner <will.ockelmann.wagner@gmail.com> (https://will-wow.surge.sh)",
+  "author": "Will Ockelmann-Wagner <will.ockelmann.wagner@gmail.com> (https://will-wow.surge.sh)",
   "license": "MIT",
   "devDependencies": {
     "@types/chai-spies": "^0.0.0",
