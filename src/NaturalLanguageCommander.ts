@@ -498,7 +498,7 @@ class NaturalLanguageCommander {
         // Flag that a match was found.
         
         // Exit early.
-        return false;
+        if (!(/^{(\w+?)}$/.test(matcher.originalUtterance))) return false;
       }
     });
 
