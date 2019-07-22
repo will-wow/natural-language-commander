@@ -99,9 +99,7 @@ class Matcher {
     utterance = this.replaceSpacesForRegexp(utterance);
     utterance = this.replaceBracesForRegexp(utterance);
 
-    // Add the start carat, so this only matches the start of commands,
-    // which helps with collisions.
-    utterance = "^\\s*" + utterance;
+    utterance = "^\\s*" + utterance + "\\s*$";
 
     // Compile the regular expression, ignore case.
     this.regExp = new RegExp(utterance, "i");
