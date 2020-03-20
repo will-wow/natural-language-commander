@@ -135,6 +135,8 @@ class Matcher {
     /** Map the slotNames to the matched data. */
     const matchedSlots: ISlotMapping = {};
 
+    console.log(matches, this.slotMapping);
+
     // Check each slot to see if it matches.
     _.forEach(this.slotMapping, (slot: IIntentSlot, i: number) => {
       const slotText = matches[i];
@@ -241,7 +243,7 @@ class Matcher {
 
     const slotType: ISlotType = this.slotTypes[slotTypeName];
     const slotOptions: SlotTypeItem = slotType.matcher;
-
+    
     // Match the slot based on the type.
     if (_.isRegExp(slotOptions)) {
       return this.getRegexpSlot(slotText, slotOptions);

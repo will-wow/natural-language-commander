@@ -504,6 +504,14 @@ class NaturalLanguageCommander {
 
     return foundMatch;
   }
+
+  public getIntents() {
+    return this.intents;
+  }
+
+  public getSlotTypes() {
+    return this.slotTypes;
+  }
 }
 
 // Use a standard npm export for post-transpile node compatibility.
