@@ -67,14 +67,6 @@ matched to (if anything), and use that data to train your machine learning
 algorithm later. And even if you're planning on sticking with NLC, logging
 unmatched commands is a good way to find utterances you hadn't thought of.
 
-### Ask questions
-
-Sometimes you may want to ask a user a specific question, and get back a
-specific type of answer. Maybe the user didn't provide you enough information to work with,
-or maybe you want them to go through a complex dialog. NLC helps you ask a
-specific user a specific question, and decide if their answer is a valid answer,
-is just a different command, is cancelling the question, or is invalid.
-
 ## Installation
 
 Install from npm with
@@ -116,11 +108,6 @@ and Slot Types.
 An _intent_ is a collection of utterances, slots, and a callback
 that collectively describe a single conceptual command, like "add
 an item to my todo list."
-
-### Questions
-
-A _question_ is a named question you can register. When you later ask the question,
-NLC will handle asking the user and validating their answer.
 
 ### Utterances
 
@@ -344,32 +331,6 @@ nlc
     console.log(`${userInput} matched with ${intentName}!`);
   });
 ```
-
-## Asking Questions
-
-To register a question, call `nlc.registerQuestion` with a Question object with the attributes:
-
-* `name` {string} - The name of the question. Used to ask the question later.
-* `slotType` {string} - The name of a registered slot type. This is the type of answer that the question is looking for.
-* `utterances?` {string[]} - An optional list of utterances to match the answer against.
-  These should include the slot as `{Slot}`. If not specified, the utterance is simply `'{Slot}'`.
-* `questionCallback` {(data: any) => void} - Called when `nlc.ask()` is called. Used to ask the user the question.
-* `successCallback` {(data: any, slot: any) => void} - Called when the answer matches.
-* `cancelCallback?` {(data: any) => void} - Called when the answer was something like "cancel". If not specified,
-  handle "cancel" as a normal answer.
-* `failCallback` {(data: any) => void} - Called when the answer does not match. Could be used to re-ask the question.
-
-After registering a question, to actually ask that question, call `nlc.ask()` with the signatures:
-
-* `nlc.ask(question: string)` - Just ask the question. The next `nlc.handleCommand()` that doesn't include
-  a userId will be treated as the answer. Used if the NLC instance only supports one user.
-* `nlc.ask(data)` - Data should be an object with the attribtes:
-  * userId? {string} - A unique identifier for the user. The next `nlc.handleCommand()` that specifies this
-    userId will be treated as the answer.
-  * question {string} - The question name. If this is not found, the function will return false.
-
-Note that if the user's next response is a valid command, the associated intent will handle
-it, since the user is probably giving up on answering the question.
 
 ### Examples
 

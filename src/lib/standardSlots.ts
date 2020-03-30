@@ -22,12 +22,6 @@ const DATE_FORMATS = [
   "YYYY-M-D"
 ];
 
-/** Commands to cancel a question. */
-export const NEVERMIND: ISlotType = {
-  type: "NEVERMIND",
-  matcher: ["nevermind", "never mind", "cancel", "exit", "back", "quit"]
-};
-
 /** A string of any length. */
 export const STRING: ISlotType = {
   type: "STRING",

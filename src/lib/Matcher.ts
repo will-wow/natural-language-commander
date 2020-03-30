@@ -135,8 +135,6 @@ class Matcher {
     /** Map the slotNames to the matched data. */
     const matchedSlots: ISlotMapping = {};
 
-    console.log(matches, this.slotMapping);
-
     // Check each slot to see if it matches.
     _.forEach(this.slotMapping, (slot: IIntentSlot, i: number) => {
       const slotText = matches[i];
