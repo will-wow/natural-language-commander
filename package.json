@@ -1,6 +1,6 @@
 {
   "name": "@voiceflow/natural-language-commander",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A tool for connecting natural language commands with callbacks.",
   "homepage": "https://github.com/will-wow/natural-language-commander",
   "bugs": "https://github.com/will-wow/natural-language-commander/issues",

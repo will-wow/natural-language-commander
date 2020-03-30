@@ -8,6 +8,7 @@ import {
   IIntentFullfilment,
 } from "./lib/nlcInterfaces";
 import Matcher from "./lib/Matcher";
+import { getRequired } from './lib/standardSlots';
 
 /** Holds registered natural language commands. */
 class NaturalLanguageCommander {
@@ -224,6 +225,39 @@ class NaturalLanguageCommander {
     const intent = this.getIntent(match.intent);
     if (!intent || !match.required.length) throw new Error(`NLC: unable to handle dialog ${match.intent}`);
 
+    // save all intent slot utterances
+    const dialogMatchers: Matcher[] = [];
+    match.required?.forEach((slot) => {
+      if(slot.dialog?.utterances) {
+        slot.dialog.utterances.forEach((utterance) => {
+          dialogMatchers.push(new Matcher(this.slotTypes, {
+            intent: slot.name,
+            slots: intent.slots,
+            utterances: [],
+          }, utterance.trim()));
+        })
+      }
+    });
+
+    // match against dialogs
+    for (const matcher of dialogMatchers) {
+      const orderedSlots: ISlotFullfilment[] = matcher.check(command);
+      if (orderedSlots) {
+        // merge previously filled slots and new ones using dict
+        const slotMap = orderedSlots.reduce((acc, curr) => {acc[curr.name] = curr.value; return acc}, {});
+        match.slots?.forEach((slot) => {
+          if (!slotMap[slot.name]?.value && slot.value) slotMap[slot.name] = slot.value;
+        });
+
+        const slots = Object.keys(slotMap).map((name) => ({ name: name, value: slotMap[name]}));
+        return {
+          intent: match.intent,
+          slots,
+          required: getRequired(intent.slots, slots)
+        }
+      }
+    }
+
     // If no dialog matched, 
     const otherIntent = this.handleCommand(command);
     if (otherIntent) return otherIntent;
@@ -273,7 +307,7 @@ class NaturalLanguageCommander {
           intent: matcher.intent.intent,
           slots: orderedSlots,
           // slots in intent that are required and not part of orderedSlots
-          required: matcher.intent.slots?.filter(({ required, name }) => required && !orderedSlots.some((m) => m.name === name)) || []
+          required: getRequired(matcher.intent.slots, orderedSlots)
         };
 
         // Flag that a match was found.
@@ -289,7 +323,7 @@ class NaturalLanguageCommander {
           foundMatch = {
             intent: intent.intent,
             slots: [],
-            required: intent.slots?.filter(({ required }) => required) || [],
+            required: getRequired(intent.slots, []),
           }
           return false;
         }

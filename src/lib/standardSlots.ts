@@ -6,7 +6,7 @@
 import _ = require("lodash");
 import moment = require("moment-timezone");
 
-import { ISlotType } from "./nlcInterfaces";
+import { ISlotType, IIntentSlot, ISlotFullfilment } from "./nlcInterfaces";
 
 // TODO: Make this configurable.
 /** The timezone to use for relative dates. */
@@ -118,3 +118,7 @@ export const SLACK_ROOM: ISlotType = {
   matcher: /^[#@]\w+/i,
   baseMatcher: "[#@]\\w+"
 };
+
+export const getRequired = (intentSlots: IIntentSlot[], filled: ISlotFullfilment[]) => {
+  return intentSlots?.filter(({ required, name }) => required && !filled.some((m) => !!m.value && (m.name === name))) || [];
+}
