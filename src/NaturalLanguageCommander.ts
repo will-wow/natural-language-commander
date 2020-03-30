@@ -1,5 +1,6 @@
 import _ = require("lodash");
 
+import produce from 'immer';
 import {
   ISlotType,
   IIntent,
@@ -228,12 +229,13 @@ class NaturalLanguageCommander {
     if (otherIntent) return otherIntent;
 
     // if nothing matches, take the raw string as the next required slot
-    const required = match.required.shift();
-    match.slots.push({
-      name: required.name,
-      value: command
+    return produce(match, (draft) => {
+      const required = draft.required.shift();
+      draft.slots.push({
+        name: required.name,
+        value: command
+      });
     });
-    return match;
   }
 
   /**
@@ -271,7 +273,7 @@ class NaturalLanguageCommander {
           intent: matcher.intent.intent,
           slots: orderedSlots,
           // slots in intent that are required and not part of orderedSlots
-          required: matcher.intent.slots.filter(({ required, name }) => required && !orderedSlots.some((m) => m.name === name)) || []
+          required: matcher.intent.slots?.filter(({ required, name }) => required && !orderedSlots.some((m) => m.name === name)) || []
         };
 
         // Flag that a match was found.
@@ -287,7 +289,7 @@ class NaturalLanguageCommander {
           foundMatch = {
             intent: intent.intent,
             slots: [],
-            required: intent.slots.filter(({ required }) => required) || [],
+            required: intent.slots?.filter(({ required }) => required) || [],
           }
           return false;
         }
