@@ -11,7 +11,7 @@
   "main": "dist/nlc.js",
   "scripts": {
     "test": "mocha --opts ./mocha.opts",
-    "build": "tsc && browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
+    "build": "tsc && NODE_ENV=production browserify ./dist/NaturalLanguageCommander.js -t [ babelify --presets [ es2015 ] --plugins [ transform-runtime ] ] --standalone NLC | derequire > dist/nlc.js && uglifyjs dist/nlc.js -o dist/nlc.min.js",
     "prebuild": "rimraf dist && mkdirp dist",
     "postbuild": "rimraf dist/test",
     "prepublish": "npm run build",
@@ -55,7 +55,6 @@
   "dependencies": {
     "@types/lodash": "^4.14.106",
     "babel-runtime": "^6.9.2",
-    "immer": "^6.0.2",
     "lodash": "^4.17.5",
     "moment": "^2.22.0",
     "moment-timezone": "^0.5.14"

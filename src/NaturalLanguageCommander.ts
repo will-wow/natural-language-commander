@@ -1,6 +1,5 @@
 import _ = require("lodash");
 
-import produce from 'immer';
 import {
   ISlotType,
   IIntent,
@@ -29,7 +28,6 @@ class NaturalLanguageCommander {
     this.matchers = [];
     // Noop the notFoundCallback.
     this.notFoundCallback = () => {};
-
   }
 
   /**
@@ -223,11 +221,11 @@ class NaturalLanguageCommander {
 
   public handleDialog(match: IIntentFullfilment, command: string): IIntentFullfilment {
     const intent = this.getIntent(match.intent);
-    if (!intent || !match.required.length) throw new Error(`NLC: unable to handle dialog ${match.intent}`);
+    if (!intent || !match.required?.length) throw new Error(`NLC: unable to handle dialog ${match.intent}`);
 
     // save all intent slot utterances
     const dialogMatchers: Matcher[] = [];
-    match.required?.forEach((slot) => {
+    match.required!.forEach((slot) => {
       if(slot.dialog?.utterances) {
         slot.dialog.utterances.forEach((utterance) => {
           dialogMatchers.push(new Matcher(this.slotTypes, {
@@ -263,13 +261,13 @@ class NaturalLanguageCommander {
     if (otherIntent) return otherIntent;
 
     // if nothing matches, take the raw string as the next required slot
-    return produce(match, (draft) => {
-      const required = draft.required.shift();
-      draft.slots.push({
-        name: required.name,
-        value: command
-      });
-    });
+    const [{ name }, ...required] = match.required;
+
+    return {
+      ...match,
+      slots: [...(intent.slots ?? []), { name,value: command }],
+      required: required,
+    }
   }
 
   /**
